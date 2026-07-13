@@ -1257,18 +1257,31 @@
             coins: 100, gems: 0, xp: 0, level: 1, streak: 0, blocks: 0,
             countryIndex: 0, cityIndex: 0,
             isFever: false, isGoldRound: false, pendingGoldPrompt: false,
-            isTransitioningLevel: false, 
+            isTransitioningLevel: false,
             goldTimer: null, goldTimeLeft: 15,
-            
+
+            // Question timer (per-question, 15s tiered reward)
+            qTimer: null, qStartTs: 0, qElapsed: 0,
+
+            // Lives — Playtika-style hearts. Max 3, +1 per continent cleared.
+            hearts: 3,
+
+            // Continent tracking — used to award a heart when a new continent begins.
+            lastContinentCleared: null,
+
+            // Auth mode: 'guest' | 'user'. Guests: no save, no hints.
+            authMode: 'guest',
+            userEmail: null,
+
             // Gold Round Logic limits
             goldRoundsInCountry: 0,
             verbsSinceLastGold: 5, // Starts at 5 so it's ready once cityIndex > 0
-            
+
             usedVerbIds: [],
             missions: [],
             currentVerb: null, currentStep: 'v2',
             correctAnswer: null, isAnswering: false, soundOn: true,
-            
+
             // Powerups
             inventory: { scissors: 0 },
             activeShield: false,
@@ -1278,16 +1291,23 @@
         const FEVER_THRESHOLD = 5;
         const BLOCKS_PER_TOWER = 10;
         const BASE_COINS = 10;
-        
+        const MAX_HEARTS = 3;
+        const Q_TIME_MS = 15000;
+
         const getEl = id => document.getElementById(id);
         const randItem = arr => arr[Math.floor(Math.random() * arr.length)];
         const shuffle = arr => arr.sort(() => Math.random() - 0.5);
 
         // --- Save / Load ---
-        const SAVE_KEY = 'vbuilding_save_v1';
+        const SAVE_KEY_BASE = 'vbuilding_save_v2';
+        const SAVE_KEY = () => state.authMode === 'user' && state.userEmail
+            ? `${SAVE_KEY_BASE}:${state.userEmail}`
+            : SAVE_KEY_BASE + ':__local';
         const SAVED_FIELDS = ['coins', 'gems', 'xp', 'level', 'countryIndex', 'cityIndex',
+            'hearts', 'lastContinentCleared',
             'goldRoundsInCountry', 'verbsSinceLastGold', 'usedVerbIds', 'missions',
             'inventory', 'activeShield', 'doubleCoinTurns', 'soundOn'];
+
 
         function saveGame() {
             try {
