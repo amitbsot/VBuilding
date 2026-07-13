@@ -2519,11 +2519,19 @@
         }
 
         (function initFromSave() {
-            const hasSave = loadGame();
+            // Auto-restore last logged-in user, if any (Firebase would replace this with onAuthStateChanged).
+            let lastUser = null;
+            try { lastUser = localStorage.getItem('vbuilding_last_user'); } catch(e) {}
+            let hasSave = false;
+            if (lastUser) {
+                state.authMode = 'user';
+                state.userEmail = lastUser;
+                hasSave = loadGameFor(lastUser);
+            }
             const playBtn = getEl('btn-play-main');
             const newGameLink = getEl('btn-new-game');
             if (hasSave) {
-                if (playBtn) playBtn.innerText = 'CONTINUE';
+                if (playBtn) playBtn.classList.remove('hidden');
                 if (newGameLink) newGameLink.classList.remove('hidden');
             }
             const soundBtn = getEl('btn-sound-toggle');
@@ -2531,7 +2539,16 @@
                 soundBtn.innerText = 'Sound OFF 🔇';
                 soundBtn.style.background = '#CBD5E0';
             }
+            renderHearts();
         })();
+
+        // Remember the last logged-in email so returning users skip the login screen.
+        const _origSubmit = submitLogin;
+        submitLogin = function(isSignup) {
+            _origSubmit(isSignup);
+            try { if (state.userEmail) localStorage.setItem('vbuilding_last_user', state.userEmail); } catch(e) {}
+        };
+
 
         window.addEventListener('beforeunload', saveGame);
 
