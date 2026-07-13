@@ -1343,7 +1343,11 @@
             updatePowerupUI();
             
             const btnHint = getEl('btn-hint');
-            if(btnHint) btnHint.classList.remove('hidden');
+            // Keep help disabled during Gold rounds — Gold questions are pure skill checks
+            if(btnHint) {
+                if (state.isGoldRound) btnHint.classList.add('hidden');
+                else btnHint.classList.remove('hidden');
+            }
 
             if (state.currentStep === 'v2' && !skipPromptCheck) {
                 state.verbsSinceLastGold++;
