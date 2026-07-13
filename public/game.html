@@ -1771,7 +1771,10 @@
             }
             if(container) container.innerHTML = layoutHtml;
             generateAnswers();
+            // Kick off the per-question 15s reward timer. Gold rounds keep their own timer + hide this one.
+            startQuestionTimer();
         }
+
 
         function generateAnswers() {
             const verb = state.currentVerb;
