@@ -1868,13 +1868,117 @@
             if(xpFill) xpFill.style.width = pct + '%';
         }
 
+        // --- Question Timer (15s, tiered reward: 0-5s full, 5-10s half, 10-15s flat 10) ---
+        function startQuestionTimer() {
+            stopQuestionTimer();
+            const wrap = getEl('q-timer-wrap');
+            const fill = getEl('q-timer-fill');
+            const secs = getEl('q-timer-secs');
+            const tier = getEl('q-timer-tier');
+            if (state.isGoldRound) { if (wrap) wrap.style.display = 'none'; return; }
+            if (wrap) wrap.style.display = 'block';
+            if (fill) { fill.style.width = '100%'; fill.classList.remove('danger'); }
+            state.qStartTs = performance.now();
+            state.qElapsed = 0;
+            state.qTimer = setInterval(() => {
+                const elapsed = performance.now() - state.qStartTs;
+                state.qElapsed = elapsed;
+                const remaining = Math.max(0, Q_TIME_MS - elapsed);
+                const pct = (remaining / Q_TIME_MS) * 100;
+                if (fill) fill.style.width = pct + '%';
+                if (secs) secs.innerText = Math.ceil(remaining / 1000);
+                if (tier) {
+                    if (elapsed < 5000) tier.innerText = '🚀 Full reward';
+                    else if (elapsed < 10000) tier.innerText = '⚡ 50% reward';
+                    else tier.innerText = '⏳ 10 coins only';
+                }
+                if (elapsed >= 10000 && fill && !fill.classList.contains('danger')) {
+                    fill.classList.add('danger');
+                }
+                if (remaining <= 0) {
+                    stopQuestionTimer();
+                    if (!state.isAnswering) handleAnswer(null, null, null);
+                }
+            }, 100);
+        }
+        function stopQuestionTimer() {
+            if (state.qTimer) { clearInterval(state.qTimer); state.qTimer = null; }
+        }
+
+        // --- Hearts (Lives) ---
+        function renderHearts() {
+            for (let i = 0; i < MAX_HEARTS; i++) {
+                const el = getEl(`heart-${i}`);
+                if (!el) continue;
+                if (i < state.hearts) { el.classList.remove('lost'); }
+                else { el.classList.add('lost'); }
+            }
+        }
+        function loseHeart() {
+            const idx = state.hearts - 1;
+            state.hearts = Math.max(0, state.hearts - 1);
+            const el = getEl(`heart-${idx}`);
+            if (el) {
+                el.classList.add('break');
+                setTimeout(() => { el.classList.remove('break'); el.classList.add('lost'); }, 600);
+            }
+            if (state.hearts <= 0) {
+                setTimeout(triggerGameOver, 900);
+            }
+        }
+        function gainHeart() {
+            if (state.hearts >= MAX_HEARTS) return;
+            const idx = state.hearts;
+            state.hearts++;
+            const el = getEl(`heart-${idx}`);
+            if (el) { el.classList.remove('lost'); el.classList.add('pop'); setTimeout(() => el.classList.remove('pop'), 600); }
+        }
+        function triggerGameOver() {
+            stopQuestionTimer();
+            state.isAnswering = true;
+            state.isTransitioningLevel = true;
+            const coinsEl = getEl('gameover-coins');
+            const lvlEl = getEl('gameover-level');
+            if (coinsEl) coinsEl.innerText = state.coins;
+            if (lvlEl) lvlEl.innerText = state.level;
+            openModal('gameover-modal');
+        }
+        function restartStageFromGameOver() {
+            // Reset the stage: back to first city of first country, refill hearts, keep coins/level (Playtika-friendly).
+            state.countryIndex = 0;
+            state.cityIndex = 0;
+            state.blocks = 0;
+            state.streak = 0;
+            state.isFever = false;
+            state.isGoldRound = false;
+            state.hearts = MAX_HEARTS;
+            state.lastContinentCleared = null;
+            state.goldRoundsInCountry = 0;
+            state.verbsSinceLastGold = 5;
+            document.body.classList.remove('fever-mode','gold-mode');
+            const goldMsg = getEl('gold-msg'); if (goldMsg) goldMsg.classList.add('hidden');
+            const feverMsg = getEl('fever-msg'); if (feverMsg) feverMsg.classList.add('hidden');
+            const stack = getEl('tower-stack'); if (stack) stack.innerHTML = '';
+            renderHearts();
+            updateUI();
+            state.isAnswering = false;
+            state.isTransitioningLevel = false;
+            saveGame();
+            closeAllModals(true);
+            setTimeout(() => nextQuestion(), 200);
+        }
+
         function handleAnswer(selectedOpt, btnElement, event) {
             if (state.isAnswering) return;
             state.isAnswering = true;
-            
+
+            const answerElapsed = state.qElapsed || (performance.now() - state.qStartTs);
+            stopQuestionTimer();
+
             clearInterval(state.goldTimer);
             const timerCont = getEl('gold-timer-container');
             if(timerCont) timerCont.classList.add('hidden');
+
 
             const isCorrect = selectedOpt === state.correctAnswer;
             
