@@ -2339,15 +2339,27 @@
 
                 if (state.cityIndex >= 3) {
                     state.cityIndex = 0;
+                    // Detect a continent switch — award a heart when the *previous* continent finishes.
+                    const prevContinent = travelDestinations[state.countryIndex]?.continent;
                     state.countryIndex++;
-                    
+
                     // Reset Gold logic for the new country
                     state.goldRoundsInCountry = 0;
                     state.verbsSinceLastGold = 5;
-                    
+
                     reachedNewCountry = true;
-                    if (state.countryIndex >= travelDestinations.length) state.countryIndex = 0; 
+                    if (state.countryIndex >= travelDestinations.length) state.countryIndex = 0;
+
+                    const newContinent = travelDestinations[state.countryIndex]?.continent;
+                    if (prevContinent && newContinent && prevContinent !== newContinent && prevContinent !== state.lastContinentCleared) {
+                        state.lastContinentCleared = prevContinent;
+                        // Reward: +1 heart (capped at MAX_HEARTS) + a small toast on the map.
+                        gainHeart();
+                        renderHearts();
+                        showMapToast(`❤️ +1 Heart — ${prevContinent} cleared!`);
+                    }
                 }
+
 
                 positionAvatarOnMap(state.countryIndex, state.cityIndex, true);
 
