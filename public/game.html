@@ -392,6 +392,52 @@
             text-shadow: 0 2px 0 rgba(255,255,255,0.6);
         }
 
+        /* Continent grouping divider — Moonactive-style world map section headers */
+        .continent-chip {
+            position: relative; z-index: 3;
+            display: inline-flex; align-items: center; gap: 8px;
+            margin: 28px 0 6px;
+            padding: 8px 22px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #FFFFFF 0%, #EAF3FF 100%);
+            border: 3px solid #FFFFFF;
+            box-shadow:
+                inset 0 3px 0 rgba(255,255,255,0.95),
+                inset 0 -3px 0 rgba(0,0,0,0.08),
+                0 6px 0 #4B7BB5,
+                0 12px 20px rgba(30,60,120,0.28);
+            color: #1E3A66;
+            font-family: var(--font-game);
+            font-size: 0.95rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 0 rgba(255,255,255,0.7);
+        }
+
+        /* Accessibility: strong, visible keyboard focus on all interactive controls */
+        .btn-3d:focus-visible,
+        #btn-hint:focus-visible,
+        .map-node:focus-visible,
+        button:focus-visible {
+            outline: 3px solid #FFE066;
+            outline-offset: 3px;
+            box-shadow:
+                0 0 0 6px rgba(255, 224, 102, 0.45),
+                0 0 0 9px rgba(26, 21, 51, 0.9);
+        }
+
+        /* HUD readability backdrop — keeps fever/gold banners legible over any effect */
+        .hud-readable {
+            padding: 6px 18px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(20,15,45,0.55) 0%, rgba(20,15,45,0.35) 100%);
+            backdrop-filter: blur(6px) saturate(1.1);
+            -webkit-backdrop-filter: blur(6px) saturate(1.1);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.2),
+                0 8px 22px rgba(0,0,0,0.35);
+        }
+
         .map-node {
             position: relative; width: 82px; height: 82px; border-radius: 50%;
             background: radial-gradient(circle at 35% 30%, #FFFFFF 0%, #E2E8F0 60%, #CBD5E1 100%);
@@ -555,12 +601,12 @@
             
             <!-- Messages and HUD (Powerups) -->
             <div class="flex-1 relative w-full pointer-events-none">
-                <div id="fever-msg" class="hidden absolute top-4 left-1/2 transform -translate-x-1/2 z-20 whitespace-nowrap">
+                <div id="fever-msg" class="hidden absolute top-4 left-1/2 transform -translate-x-1/2 z-20 whitespace-nowrap hud-readable" role="status" aria-live="polite">
                     <h2 class="text-4xl font-game text-stroke text-[#FFF4D0] italic tracking-wider drop-shadow-xl animate-bounce flex items-center gap-1">
                         🔥 FEVER x5
                     </h2>
                 </div>
-                <div id="gold-msg" class="hidden absolute top-4 left-1/2 transform -translate-x-1/2 z-20 whitespace-nowrap">
+                <div id="gold-msg" class="hidden absolute top-4 left-1/2 transform -translate-x-1/2 z-20 whitespace-nowrap hud-readable" role="status" aria-live="polite">
                     <h2 class="text-5xl font-game text-stroke text-yellow-300 italic tracking-wider drop-shadow-2xl animate-pulse flex items-center gap-1">
                         ⭐ GOLD 10x
                     </h2>
@@ -942,12 +988,35 @@
             { v1: 'wind', v2: 'wound', v3: 'wound', he: 'לפתל / להסתובב', diff: 3, ex: 'The road will wind through the mountains.' }
         ];
 
+        // Generic skyline silhouette reused for new destinations (kept subtle behind the island)
+        const GENERIC_SKYLINE = `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><rect x="10" y="55" width="14" height="45"/><rect x="26" y="40" width="12" height="60"/><rect x="40" y="20" width="16" height="80"/><rect x="58" y="35" width="14" height="65"/><rect x="74" y="50" width="14" height="50"/></svg>`;
+
+        // 3 countries per continent (6 continents × 3 = 18 destinations)
         const travelDestinations = [
-            { name: 'France', flag: '🇫🇷', cities: ['Paris', 'Marseille', 'Lyon'], accentColor: '#A3E2D1', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><path d="M50 5 L47 25 L45 50 L35 90 L20 95 L15 100 L85 100 L80 95 L65 90 L55 50 L53 25 Z"/></svg>` },
-            { name: 'Spain', flag: '🇪🇸', cities: ['Madrid', 'Barcelona', 'Seville'], accentColor: '#FED766', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><circle cx="50" cy="30" r="15"/><rect x="40" y="45" width="20" height="55"/><rect x="25" y="60" width="50" height="40"/></svg>` },
-            { name: 'UK', flag: '🇬🇧', cities: ['London', 'Manchester', 'Edinburgh'], accentColor: '#9FD7F2', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><rect x="42" y="10" width="16" height="90"/><path d="M50 0 L40 10 L60 10 Z"/><circle cx="50" cy="25" r="5" fill="white"/></svg>` },
-            { name: 'Italy', flag: '🇮🇹', cities: ['Rome', 'Venice', 'Florence'], accentColor: '#BCEE9B', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><ellipse cx="50" cy="60" rx="35" ry="25"/><rect x="15" y="60" width="70" height="40"/></svg>` },
-            { name: 'Japan', flag: '🇯🇵', cities: ['Tokyo', 'Kyoto', 'Osaka'], accentColor: '#FBBFCA', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><path d="M10 90 L50 20 L90 90 Z"/><circle cx="50" cy="45" r="12" fill="red" opacity="0.3"/></svg>` }
+            // Europe
+            { name: 'France', flag: '🇫🇷', continent: 'Europe', cities: ['Paris', 'Marseille', 'Lyon'], accentColor: '#A3E2D1', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><path d="M50 5 L47 25 L45 50 L35 90 L20 95 L15 100 L85 100 L80 95 L65 90 L55 50 L53 25 Z"/></svg>` },
+            { name: 'Spain', flag: '🇪🇸', continent: 'Europe', cities: ['Madrid', 'Barcelona', 'Seville'], accentColor: '#FED766', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><circle cx="50" cy="30" r="15"/><rect x="40" y="45" width="20" height="55"/><rect x="25" y="60" width="50" height="40"/></svg>` },
+            { name: 'Italy', flag: '🇮🇹', continent: 'Europe', cities: ['Rome', 'Venice', 'Florence'], accentColor: '#BCEE9B', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><ellipse cx="50" cy="60" rx="35" ry="25"/><rect x="15" y="60" width="70" height="40"/></svg>` },
+            // Asia
+            { name: 'Japan', flag: '🇯🇵', continent: 'Asia', cities: ['Tokyo', 'Kyoto', 'Osaka'], accentColor: '#FBBFCA', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><path d="M10 90 L50 20 L90 90 Z"/><circle cx="50" cy="45" r="12" fill="red" opacity="0.3"/></svg>` },
+            { name: 'China', flag: '🇨🇳', continent: 'Asia', cities: ['Beijing', 'Shanghai', 'Xian'], accentColor: '#FFB6B6', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'India', flag: '🇮🇳', continent: 'Asia', cities: ['Delhi', 'Mumbai', 'Jaipur'], accentColor: '#FFD59E', silhouetteSvg: GENERIC_SKYLINE },
+            // Africa
+            { name: 'Egypt', flag: '🇪🇬', continent: 'Africa', cities: ['Cairo', 'Luxor', 'Alexandria'], accentColor: '#F5D9A0', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><path d="M10 95 L50 25 L90 95 Z"/><path d="M25 95 L60 40 L95 95 Z" opacity="0.6"/></svg>` },
+            { name: 'Kenya', flag: '🇰🇪', continent: 'Africa', cities: ['Nairobi', 'Mombasa', 'Kisumu'], accentColor: '#C8E6A0', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'Morocco', flag: '🇲🇦', continent: 'Africa', cities: ['Marrakech', 'Fez', 'Casablanca'], accentColor: '#F4B183', silhouetteSvg: GENERIC_SKYLINE },
+            // North America
+            { name: 'USA', flag: '🇺🇸', continent: 'North America', cities: ['New York', 'Los Angeles', 'Chicago'], accentColor: '#9FD7F2', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'Canada', flag: '🇨🇦', continent: 'North America', cities: ['Toronto', 'Vancouver', 'Montreal'], accentColor: '#FFB6B6', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'Mexico', flag: '🇲🇽', continent: 'North America', cities: ['Mexico City', 'Cancun', 'Oaxaca'], accentColor: '#BCEE9B', silhouetteSvg: GENERIC_SKYLINE },
+            // South America
+            { name: 'Brazil', flag: '🇧🇷', continent: 'South America', cities: ['Rio', 'São Paulo', 'Salvador'], accentColor: '#A9E6B5', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'Argentina', flag: '🇦🇷', continent: 'South America', cities: ['Buenos Aires', 'Córdoba', 'Mendoza'], accentColor: '#B7E4F5', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'Peru', flag: '🇵🇪', continent: 'South America', cities: ['Lima', 'Cusco', 'Arequipa'], accentColor: '#F5B7B1', silhouetteSvg: GENERIC_SKYLINE },
+            // Oceania
+            { name: 'Australia', flag: '🇦🇺', continent: 'Oceania', cities: ['Sydney', 'Melbourne', 'Brisbane'], accentColor: '#FFD59E', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'New Zealand', flag: '🇳🇿', continent: 'Oceania', cities: ['Auckland', 'Wellington', 'Queenstown'], accentColor: '#A2EDD5', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'Fiji', flag: '🇫🇯', continent: 'Oceania', cities: ['Suva', 'Nadi', 'Lautoka'], accentColor: '#B7E4F5', silhouetteSvg: GENERIC_SKYLINE }
         ];
 
         const missionTemplates = [
@@ -1320,7 +1389,11 @@
             updatePowerupUI();
             
             const btnHint = getEl('btn-hint');
-            if(btnHint) btnHint.classList.remove('hidden');
+            // Keep help disabled during Gold rounds — Gold questions are pure skill checks
+            if(btnHint) {
+                if (state.isGoldRound) btnHint.classList.add('hidden');
+                else btnHint.classList.remove('hidden');
+            }
 
             if (state.currentStep === 'v2' && !skipPromptCheck) {
                 state.verbsSinceLastGold++;
@@ -1683,10 +1756,23 @@
             if (progressFill) progressFill.style.width = `${Math.round((completedCities / totalCities) * 100)}%`;
             if (progressLabel) progressLabel.innerText = `${completedCities}/${totalCities} 🏙️`;
 
+            let lastContinent = null;
             travelDestinations.forEach((dest, cIdx) => {
+                // Continent divider chip (Playtika-style world grouping)
+                if (dest.continent && dest.continent !== lastContinent) {
+                    const contWrap = document.createElement('div');
+                    contWrap.className = 'w-full flex justify-center z-10';
+                    const contChip = document.createElement('div');
+                    contChip.className = 'continent-chip';
+                    contChip.innerHTML = `<span class="opacity-80">🌍</span> ${dest.continent}`;
+                    contWrap.appendChild(contChip);
+                    container.appendChild(contWrap);
+                    lastContinent = dest.continent;
+                }
+
                 const headerWrap = document.createElement('div');
                 headerWrap.className = 'w-full flex justify-center z-10';
-                
+
                 const countryHeader = document.createElement('div');
                 countryHeader.className = 'country-header-node';
                 const countryDone = cIdx < state.countryIndex;
