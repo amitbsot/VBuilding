@@ -2089,6 +2089,7 @@
                 }
 
                 if (state.activeShield) {
+                    // Shield absorbs the mistake — no heart lost.
                     state.activeShield = false;
                     const shieldEl = getEl('hud-shield');
                     if(shieldEl) {
@@ -2097,20 +2098,26 @@
                     }
                 } else {
                     state.streak = 0;
+                    // Costs a heart. Game over triggers automatically if it hits 0.
+                    loseHeart();
                 }
 
-                if (state.doubleCoinTurns > 0) state.doubleCoinTurns--; 
+                if (state.doubleCoinTurns > 0) state.doubleCoinTurns--;
 
                 updateFeverState();
                 updatePowerupUI();
                 updateUI();
+                renderHearts();
                 saveGame();
                 setTimeout(() => {
                     state.isAnswering = false;
-                    if (selectedOpt === null) nextQuestion(false); 
+                    // Never queue another question if the stage ended (hearts hit 0).
+                    if (state.hearts <= 0) return;
+                    if (selectedOpt === null) nextQuestion(false);
                 }, 600);
             }
         }
+
 
         function addTowerBlock() {
             const stack = getEl('tower-stack');
