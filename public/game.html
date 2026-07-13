@@ -1501,6 +1501,8 @@
             const startScreen = getEl('screen-start');
             if(startScreen) startScreen.style.opacity = '0';
             initMissions();
+            renderHearts();
+            updateAuthBadges();
             setTimeout(() => {
                 if(startScreen) startScreen.classList.add('hidden');
                 const gameScreen = getEl('screen-game');
@@ -1510,6 +1512,45 @@
                 nextQuestion();
             }, 500);
         }
+
+        // --- Auth flow (Firebase-ready) ---
+        function playAsGuest() {
+            state.authMode = 'guest';
+            state.userEmail = null;
+            // Fresh stage — guests always start from country 0, no persisted state.
+            state.hearts = MAX_HEARTS;
+            state.lastContinentCleared = null;
+            startGame();
+        }
+
+        function submitLogin(isSignup = false) {
+            const emailEl = getEl('login-email');
+            const passEl = getEl('login-password');
+            const errEl = getEl('login-error');
+            const email = (emailEl?.value || '').trim().toLowerCase();
+            const pass = (passEl?.value || '').trim();
+            if (!email || !pass || !email.includes('@')) {
+                if (errEl) { errEl.innerText = 'Please enter a valid email and password.'; errEl.classList.remove('hidden'); }
+                return;
+            }
+            // TODO(Firebase): swap this local demo for signInWithEmailAndPassword / createUserWithEmailAndPassword.
+            state.authMode = 'user';
+            state.userEmail = email;
+            const loaded = loadGameFor(email);
+            if (!loaded) {
+                state.hearts = MAX_HEARTS;
+                state.lastContinentCleared = null;
+            }
+            if (errEl) errEl.classList.add('hidden');
+            closeAllModals(true);
+            startGame();
+        }
+
+        function updateAuthBadges() {
+            const badge = getEl('guest-badge');
+            if (badge) badge.classList.toggle('hidden', state.authMode === 'user');
+        }
+
 
         let modalTimeout;
         function openModal(id) {
