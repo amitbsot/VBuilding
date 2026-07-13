@@ -2001,7 +2001,15 @@
                     state.doubleCoinTurns--;
                 }
 
-                let coinsEarned = BASE_COINS * multi * (state.isFever ? 5 : 1);
+                // Tiered reward by answer speed (skip for gold rounds — gold uses its own 10x multi).
+                let baseByTier;
+                if (state.isGoldRound) baseByTier = BASE_COINS;
+                else if (answerElapsed < 5000) baseByTier = BASE_COINS;         // full
+                else if (answerElapsed < 10000) baseByTier = Math.round(BASE_COINS * 0.5); // 50%
+                else baseByTier = 10;                                            // late: flat 10
+                const feverBonus = (state.isFever && !state.isGoldRound) ? 5 : 1;
+                let coinsEarned = (state.isGoldRound ? BASE_COINS : baseByTier) * multi * feverBonus;
+
                 gainXP(15 * (state.isFever ? 2 : 1) * (state.isGoldRound ? 2 : 1)); 
                 
                 // --- SAFE COORDINATES FALLBACK ---
