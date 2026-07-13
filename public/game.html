@@ -662,7 +662,7 @@
 
             <!-- Login button: saves progress -->
             <button id="btn-login" onclick="openModal('login-modal')" class="btn-3d btn-play auth-btn py-4 text-2xl text-white text-stroke mb-3">
-                🔐 Login ; Save Progress
+                🔐 Login
             </button>
 
             <!-- Guest button: no save, no hints -->
@@ -688,7 +688,16 @@
     <div id="screen-game" class="hidden absolute inset-0 z-10 flex flex-col">
         <!-- Progress Bar -->
         <div class="xp-bar-wrap"><div id="xp-bar-fill" class="xp-bar-fill"></div></div>
-        
+
+     <!-- Hearts & Guest badge strip -->
+       <div class="w-full flex justify-center items-center gap-2 -mt-1 mb-1 z-20 relative">
+            <div id="hearts-hud" class="hearts-hud" title="Lives">
+                <span id="heart-0" class="heart">❤️</span>
+                <span id="heart-1" class="heart">❤️</span>
+                <span id="heart-2" class="heart">❤️</span>
+            </div>
+            <span id="guest-badge" class="hidden">👤 Guest</span>
+        </div>
         <!-- Optimized Header -->
         <header class="w-full p-2 md:p-3 z-20 flex justify-between items-center gap-1 md:gap-2 relative shrink-0">
             <button onclick="openModal('pause-modal')" class="btn-3d btn-icon w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-lg flex-shrink-0 font-ui text-white">
@@ -725,8 +734,7 @@
                         <span id="ui-gems" class="font-game text-sm md:text-base text-slate-800 drop-shadow-sm ml-0.5">0</span>
                     </div>
                 </div>
-            </div>
-
+            </div>            
             <div class="flex flex-col items-end gap-1 flex-shrink-0">
                 <button onclick="openMapModal()" title="World Map" class="btn-3d btn-icon w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-xl md:text-2xl">
                     🗺️
@@ -738,24 +746,13 @@
             </div>
         </header>
 
-        <!-- Hearts & Guest badge strip -->
-        <div class="w-full flex justify-center items-center gap-2 -mt-1 mb-1 z-20 relative">
-            <div id="hearts-hud" class="hearts-hud" title="Lives">
-                <span id="heart-0" class="heart">❤️</span>
-                <span id="heart-1" class="heart">❤️</span>
-                <span id="heart-2" class="heart">❤️</span>
-            </div>
-            <span id="guest-badge" class="hidden">👤 Guest</span>
-        </div>
-
-
-        <!-- Main Wrapper for Visual and Interaction areas -->
+              <!-- Main Wrapper for Visual and Interaction areas -->
         <div class="flex-1 flex flex-col relative w-full overflow-hidden justify-end">
             
             <!-- Messages and HUD (Powerups) -->
             <div class="flex-1 relative w-full pointer-events-none">
                 <div id="fever-msg" class="hidden absolute top-4 left-1/2 transform -translate-x-1/2 z-20 whitespace-nowrap hud-readable" role="status" aria-live="polite">
-                    <h2 class="text-4xl font-game text-stroke text-[#FFF4D0] italic tracking-wider drop-shadow-xl animate-bounce flex items-center gap-1">
+                    <h2 class="relative left-1/2 text-4xl font-game text-stroke text-[#FFF4D0] italic tracking-wider drop-shadow-xl animate-bounce flex items-center gap-1">
                         🔥 FEVER x5
                     </h2>
                 </div>
