@@ -1310,29 +1310,34 @@
 
 
         function saveGame() {
+            // Guests never persist progress — enforce this so guest sessions stay ephemeral.
+            if (state.authMode !== 'user') return;
             try {
                 const toSave = {};
                 SAVED_FIELDS.forEach(key => { toSave[key] = state[key]; });
-                localStorage.setItem(SAVE_KEY, JSON.stringify(toSave));
+                toSave.userEmail = state.userEmail;
+                localStorage.setItem(SAVE_KEY(), JSON.stringify(toSave));
             } catch(e) { console.warn('Save skipped', e); }
         }
 
-        function loadGame() {
+        function loadGameFor(email) {
             try {
-                const raw = localStorage.getItem(SAVE_KEY);
+                const key = `${SAVE_KEY_BASE}:${email}`;
+                const raw = localStorage.getItem(key);
                 if (!raw) return false;
                 const saved = JSON.parse(raw);
-                SAVED_FIELDS.forEach(key => {
-                    if (saved[key] !== undefined) state[key] = saved[key];
+                SAVED_FIELDS.forEach(key2 => {
+                    if (saved[key2] !== undefined) state[key2] = saved[key2];
                 });
                 return true;
             } catch(e) { console.warn('Load skipped', e); return false; }
         }
 
         function resetGame() {
-            try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+            try { localStorage.removeItem(SAVE_KEY()); } catch(e) {}
             location.reload();
         }
+
 
         function confirmNewGame() {
             if (confirm('Start a new game? Your current progress (coins, level, and map) will be lost.')) {
