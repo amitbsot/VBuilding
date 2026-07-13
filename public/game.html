@@ -727,10 +727,27 @@
                 </div>
             </div>
 
-            <button onclick="openMapModal()" class="btn-3d btn-icon w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-xl md:text-2xl flex-shrink-0">
-                🗺️
-            </button>
+            <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                <button onclick="openMapModal()" title="World Map" class="btn-3d btn-icon w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-xl md:text-2xl">
+                    🗺️
+                </button>
+                <button onclick="openModal('missions-modal')" title="Daily Missions" class="btn-3d btn-icon w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-xl md:text-2xl relative" style="background: linear-gradient(to bottom, #6BE3B4, #2A9D6A); --shadow-color: #1F7A55; border: 2px solid white;">
+                    🎯
+                    <span id="missions-badge" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] font-black px-1.5 rounded-full border border-white">!</span>
+                </button>
+            </div>
         </header>
+
+        <!-- Hearts & Guest badge strip -->
+        <div class="w-full flex justify-center items-center gap-2 -mt-1 mb-1 z-20 relative">
+            <div id="hearts-hud" class="hearts-hud" title="Lives">
+                <span id="heart-0" class="heart">❤️</span>
+                <span id="heart-1" class="heart">❤️</span>
+                <span id="heart-2" class="heart">❤️</span>
+            </div>
+            <span id="guest-badge" class="hidden">👤 Guest</span>
+        </div>
+
 
         <!-- Main Wrapper for Visual and Interaction areas -->
         <div class="flex-1 flex flex-col relative w-full overflow-hidden justify-end">
