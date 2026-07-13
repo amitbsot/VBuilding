@@ -1,24 +1,41 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "VBuilding — The #1 Irregular Verbs Game" },
+      {
+        name: "description",
+        content:
+          "Master English irregular verbs in a Playtika-grade arcade adventure. Build cities, travel the world, and level up your grammar.",
+      },
+      { property: "og:title", content: "VBuilding — The #1 Irregular Verbs Game" },
+      {
+        property: "og:description",
+        content:
+          "A premium arcade-style verbs game. Travel countries, stack blocks, hit fever mode.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <iframe
+      src="/game.html"
+      title="VBuilding Game"
+      style={{
+        position: "fixed",
+        inset: 0,
+        width: "100%",
+        height: "100%",
+        border: "none",
+        display: "block",
+      }}
+      allow="autoplay; fullscreen"
+    />
   );
 }
