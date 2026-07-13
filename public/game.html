@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>VBuilding - Premium Irregular Verbs Game</title>
+    <!-- Tailwind CSS for modern responsive utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Playful and modern typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Titan+One&family=Rubik:wght@400;500;700;900&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --font-game: 'Titan One', cursive;
+            --font-hebrew: 'Rubik', sans-serif;
+            --font-ui: 'Nunito', sans-serif;
+            
+            --bg-normal: linear-gradient(180deg, #E6F4F8 0%, #FDFBF7 100%); 
+            --bg-fever: linear-gradient(180deg, #FFEBEB 0%, #FFF5E6 100%);
+            --bg-gold: linear-gradient(180deg, #FFFDEB 0%, #FFF3B0 100%);
+            
+            --gold-light: #FFF4D0;
+            --gold-main: #FFD23C;
+            --gold-dark: #D49A00;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background: var(--bg-normal);
+            color: #2D3748;
+            overflow: hidden;
+            touch-action: none;
+            transition: background 0.8s ease;
+        }
+
+        .fever-mode { background: var(--bg-fever) !important; }
+        .gold-mode { background: var(--bg-gold) !important; }
+
+        .text-stroke {
+            -webkit-text-stroke: 2px #1A202C;
+            text-shadow: 0 4px 0 #1A202C, 0 6px 15px rgba(0,0,0,0.25);
+            color: white;
+        }
+        
+        .text-stroke-sm {
+            -webkit-text-stroke: 1.5px #1A202C;
+            text-shadow: 0 3px 0 #1A202C, 0 4px 8px rgba(0,0,0,0.2);
+            color: white;
+        }
+
+        .text-stroke-gold {
+            -webkit-text-stroke: 2.5px #7A5300;
+            text-shadow: 0 5px 0 #A37100, 0 8px 15px rgba(0,0,0,0.3);
+            color: var(--gold-light);
+            background: -webkit-linear-gradient(#FFFFE0, #FFD23F);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .font-game { font-family: var(--font-game); }
+        .font-hebrew { font-family: var(--font-hebrew); }
+
+        .btn-3d {
+            position: relative;
+            border-radius: 20px;
+            font-weight: 900;
+            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            box-shadow: 
+                inset 0 4px 0 rgba(255,255,255,0.6),
+                inset 0 -4px 0 rgba(0,0,0,0.15),
+                0 6px 0 var(--shadow-color, #000),
+                0 10px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-3d:active, .btn-3d.simulate-active {
+            transform: translateY(6px);
+            box-shadow: 
+                inset 0 4px 0 rgba(255,255,255,0.6),
+                inset 0 -2px 0 rgba(0,0,0,0.1),
+                0 0px 0 var(--shadow-color, #000),
+                0 4px 5px rgba(0,0,0,0.1);
+        }
+
+        .btn-3d:disabled {
+            filter: grayscale(100%);
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: translateY(6px);
+            box-shadow: none;
+        }
+
+        .btn-play {
+            background: linear-gradient(to bottom, #A9F0D1, #51D8A2);
+            --shadow-color: #1F7A55;
+            border: 3px solid #F0FFF9;
+        }
+
+        .btn-icon {
+            background: linear-gradient(to bottom, #9FD7F2, #5CB4E4);
+            --shadow-color: #317296;
+            border: 2px solid white;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.08); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes dropAndBounce {
+            0% { transform: translateY(-400px) scale(1); opacity: 0; }
+            50% { transform: translateY(0) scaleY(0.7) scaleX(1.1); opacity: 1; }
+            70% { transform: translateY(-25px) scaleY(1.03) scaleX(0.97); }
+            85% { transform: translateY(0) scaleY(0.97) scaleX(1.02); }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        /* Fixed Shake Animation - Island stays centered */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-3px) rotate(-1.5deg); }
+            50% { transform: translateX(3px) rotate(1.5deg); }
+            75% { transform: translateX(-1px) rotate(-0.5deg); }
+        }
+        .shake-effect { animation: shake 0.35s cubic-bezier(.36,.07,.19,.97) both; }
+
+        @keyframes particleBurst {
+            0% { transform: translate(0,0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--px), var(--py)) scale(0); opacity: 0; }
+        }
+
+        @keyframes correctAnswerPop {
+            0% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.3); filter: brightness(1.2); color: #FFF4D0; }
+            100% { transform: scale(1.1); filter: brightness(1.1); color: #FFF; }
+        }
+
+        .correct-pop {
+            animation: correctAnswerPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            -webkit-text-stroke: 1.5px #15803d !important;
+            text-shadow: 0 0 15px rgba(34, 197, 94, 0.8), 0 4px 0 #15803d !important;
+        }
+
+        .xp-bar-wrap {
+            position: relative;
+            width: 100%; 
+            height: 6px; 
+            background: rgba(255,255,255,0.5); 
+            z-index: 25;
+            margin-bottom: 6px; 
+        }
+        .xp-bar-fill {
+            height: 100%; width: 0%; background: linear-gradient(90deg, #7C6CF6, #B69CFF);
+            box-shadow: 0 0 8px rgba(124,108,246,0.7); transition: width 0.6s ease;
+        }
+
+        #island-base {
+            position: relative;
+            width: 250px; height: 90px; background: #A3E2D1; border-radius: 50%;
+            box-shadow: inset 0 -15px 0 #7AC8B2, inset 0 4px 10px rgba(255,255,255,0.6), 0 25px 35px rgba(0,0,0,0.12);
+            z-index: 5; transition: background-color 1s ease;
+            margin: 0 auto;
+        }
+
+        .skyline-silhouette {
+            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
+            width: 210px; height: 100px; z-index: 2; opacity: 0.18; pointer-events: none; transition: all 0.8s ease;
+        }
+
+        .blocks-container {
+            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
+            width: 150px; height: 300px; pointer-events: none;
+        }
+
+        .color-block {
+            position: absolute;
+            left: 50%; margin-left: -60px; /* Center perfectly */
+            width: 120px; height: 38px; border-radius: 10px; border: 3px solid rgba(255,255,255,0.95);
+            box-shadow: inset 0 6px 0 rgba(255,255,255,0.4), inset 0 -6px 0 rgba(0,0,0,0.2), 0 8px 12px rgba(0,0,0,0.12);
+            animation: dropAndBounce 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        .particle {
+            position: absolute; width: 8px; height: 8px; background: white; border-radius: 50%;
+            pointer-events: none; z-index: 50; animation: particleBurst 0.5s ease-out forwards;
+        }
+
+        .map-container {
+            position: relative; width: 100%; height: 65vh; overflow-y: auto; overflow-x: hidden;
+            background: linear-gradient(180deg, #4ade80 0%, #86efac 40%, #bbf7d0 100%);
+            border-radius: 24px; border: 6px solid white;
+            display: flex; flex-direction: column-reverse; align-items: center;
+            padding: 40px 0; scroll-behavior: smooth;
+            box-shadow: inset 0 0 30px rgba(0,100,0,0.15), 0 15px 30px rgba(0,0,0,0.2);
+            touch-action: pan-y;
+        }
+
+        .overflow-y-auto { touch-action: pan-y; }
+        
+        .map-bg-elements {
+            position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 10%),
+                radial-gradient(circle at 80% 60%, rgba(255,255,255,0.4) 0%, transparent 10%);
+        }
+
+        #map-svg-path {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none;
+        }
+
+        .country-header-node {
+            position: relative; width: 85%;
+            background: linear-gradient(to bottom, #FFF, #F1F5F9); border: 3px solid #CBD5E0;
+            border-radius: 20px; padding: 10px 16px; margin: 40px 0;
+            text-align: center; font-weight: 900; font-size: 1.3rem; color: #334155;
+            z-index: 2; box-shadow: 0 6px 0 #94A3B8, 0 10px 15px rgba(0,0,0,0.15);
+        }
+
+        .map-node {
+            position: relative; width: 75px; height: 75px; border-radius: 50%;
+            background: linear-gradient(to bottom, #F8FAFC, #E2E8F0); border: 4px solid white;
+            margin: 25px 0; display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; z-index: 2; transition: all 0.4s ease;
+            box-shadow: 0 8px 0 #94A3B8, 0 10px 15px rgba(0,0,0,0.15);
+            cursor: pointer;
+        }
+        .map-node:active { transform: scale(0.92); }
+
+        .map-node.completed {
+            background: linear-gradient(to bottom, #6BE3B4, #48C798);
+            box-shadow: 0 8px 0 #2A9D6A, 0 10px 20px rgba(107, 227, 180, 0.4);
+            border-color: #E6FFF3;
+        }
+        
+        .map-node.current {
+            background: linear-gradient(to bottom, #FFEA7C, #FFD23F); transform: scale(1.15);
+            box-shadow: 0 8px 0 #D49A00, 0 10px 20px rgba(255, 210, 63, 0.5);
+            animation: pulse-node 2s infinite; border-color: #FFF;
+        }
+
+        @keyframes pulse-node {
+            0% { box-shadow: 0 8px 0 #D49A00, 0 0 0 0 rgba(255, 210, 63, 0.7); }
+            70% { box-shadow: 0 8px 0 #D49A00, 0 0 0 15px rgba(255, 210, 63, 0); }
+            100% { box-shadow: 0 8px 0 #D49A00, 0 0 0 0 rgba(255, 210, 63, 0); }
+        }
+
+        #player-avatar {
+            position: absolute; width: 50px; height: 50px; background: white;
+            border-radius: 50%; border: 3px solid #FF6B6B;
+            display: flex; align-items: center; justify-content: center; font-size: 1.6rem;
+            z-index: 10; transition: top 1.2s ease-in-out, left 1.2s ease-in-out;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3); transform: translate(-50%, -50%);
+        }
+
+        .hub-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; }
+        .hub-btn {
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            padding: 16px 4px; border-radius: 18px; font-weight: 900; font-size: 0.85rem; color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .mission-card.completed { opacity: 0.7; }
+        .mission-card.completed .mission-title { text-decoration: line-through; color: #94A3B8; }
+        
+        .timer-bar { transition: width 1s linear; }
+    </style>
+</head>
+<body class="flex flex-col h-[100dvh] w-screen relative">
+
+    <!-- Start Screen -->
+    <div id="screen-start" class="absolute inset-0 z-40 flex flex-col items-center justify-center bg-white/40 backdrop-blur-md transition-opacity duration-500">
+        <div class="relative w-full max-w-md flex flex-col items-center px-6" style="animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+            <div class="relative mb-8 text-center">
+                <div class="absolute -inset-8 bg-white blur-3xl opacity-80 rounded-full animate-pulse"></div>
+                <h1 class="text-7xl md:text-8xl font-game text-stroke-gold relative z-10 leading-none pb-2">V<br>Building</h1>
+                <p class="text-slate-600 font-bold text-lg mt-2 relative z-10 drop-shadow-sm">The #1 Irregular Verbs Game 👑</p>
+            </div>
+            
+            <button id="btn-play-main" onclick="startGame()" class="btn-3d btn-play w-full py-5 text-4xl text-white text-stroke mb-4">
+                PLAY NOW
+            </button>
+            <button onclick="openModal('instructions-modal')" class="btn-3d w-full py-3 text-xl text-slate-700 font-black mb-4 shadow-sm" style="background: linear-gradient(to bottom, #F8FAFC, #E2E8F0); --shadow-color: #94A3B8; border: 2px solid white;">
+                How to Play 📖
+            </button>
+            <button id="btn-new-game" onclick="confirmNewGame()" class="hidden text-slate-500 font-bold text-sm underline">
+                Start a New Game
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Game Screen -->
+    <div id="screen-game" class="hidden absolute inset-0 z-10 flex flex-col">
+        <!-- Progress Bar -->
+        <div class="xp-bar-wrap"><div id="xp-bar-fill" class="xp-bar-fill"></div></div>
+        
+        <!-- Optimized Header -->
+        <header class="w-full p-2 md:p-3 z-20 flex justify-between items-center gap-1 md:gap-2 relative shrink-0">
+            <button onclick="openModal('pause-modal')" class="btn-3d btn-icon w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-lg flex-shrink-0 font-ui text-white">
+                ||
+            </button>
+
+            <!-- Country & City Progress -->
+            <div class="glass-panel flex-1 max-w-[160px] md:max-w-[180px] rounded-full p-1.5 flex flex-col gap-1 items-center relative flex-shrink-0">
+                <div class="absolute -top-3 bg-gradient-to-b from-blue-400 to-indigo-500 border-2 border-white text-[10px] md:text-[11px] font-black px-2 md:px-3 py-0.5 rounded-full shadow-md text-white z-10 flex items-center gap-1 drop-shadow whitespace-nowrap">
+                    <span id="hud-country-flag">🇫🇷</span>
+                    <span id="hud-country-name">France</span>
+                </div>
+                <div class="flex flex-col items-center w-full mt-2 relative z-0">
+                    <span id="hud-city-name" class="text-[10px] md:text-xs font-black text-slate-700 drop-shadow-sm">Paris</span>
+                    <div class="flex gap-1.5 mt-1.5">
+                        <div id="hud-city-dot-0" class="w-3 h-3 md:w-4 md:h-4 rounded-full bg-slate-300 border border-white flex items-center justify-center text-[7px] md:text-[9px]">🏢</div>
+                        <div id="hud-city-dot-1" class="w-3 h-3 md:w-4 md:h-4 rounded-full bg-slate-300 border border-white flex items-center justify-center text-[7px] md:text-[9px]">🏢</div>
+                        <div id="hud-city-dot-2" class="w-3 h-3 md:w-4 md:h-4 rounded-full bg-slate-300 border border-white flex items-center justify-center text-[7px] md:text-[9px]">🏢</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Level & Economy -->
+            <div class="flex items-center gap-1 flex-shrink-0">
+                <div id="level-badge-inline" class="w-8 h-8 md:w-9 md:h-9 rounded-full bg-gradient-to-b from-violet-400 to-violet-600 border-2 border-white flex items-center justify-center text-xs md:text-sm text-white shadow-md font-game">1</div>
+
+                <div class="glass-panel flex items-center gap-2 px-1.5 py-1 md:px-2 md:py-1.5 rounded-full">
+                    <div id="score-wrapper" class="flex items-center transition-transform">
+                        <div class="w-6 h-6 md:w-7 md:h-7 rounded-full bg-gradient-to-br from-yellow-200 to-yellow-500 border border-white shadow-inner flex items-center justify-center text-xs">🪙</div>
+                        <span id="ui-score" class="font-game text-sm md:text-base text-slate-800 drop-shadow-sm ml-0.5">0</span>
+                    </div>
+                    <div id="gems-wrapper" class="flex items-center transition-transform">
+                        <div class="w-6 h-6 md:w-7 md:h-7 rounded-full bg-gradient-to-br from-teal-200 to-emerald-500 border border-white shadow-inner flex items-center justify-center text-[10px] md:text-xs">💎</div>
+                        <span id="ui-gems" class="font-game text-sm md:text-base text-slate-800 drop-shadow-sm ml-0.5">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="openMapModal()" class="btn-3d btn-icon w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-xl md:text-2xl flex-shrink-0">
+                🗺️
+            </button>
+        </header>
+
+        <!-- Main Wrapper for Visual and Interaction areas -->
+        <div class="flex-1 flex flex-col relative w-full overflow-hidden justify-end">
+            
+            <!-- Messages and HUD (Powerups) -->
+            <div class="flex-1 relative w-full pointer-events-none">
+                <div id="fever-msg" class="hidden absolute top-4 left-1/2 transform -translate-x-1/2 z-20 whitespace-nowrap">
+                    <h2 class="text-4xl font-game text-stroke text-[#FFF4D0] italic tracking-wider drop-shadow-xl animate-bounce flex items-center gap-1">
+                        🔥 FEVER x5
+                    </h2>
+                </div>
+                <div id="gold-msg" class="hidden absolute top-4 left-1/2 transform -translate-x-1/2 z-20 whitespace-nowrap">
+                    <h2 class="text-5xl font-game text-stroke text-yellow-300 italic tracking-wider drop-shadow-2xl animate-pulse flex items-center gap-1">
+                        ⭐ GOLD 10x
+                    </h2>
+                </div>
+            </div>
+
+            <!-- Visual Area (Island) - Reduced Bottom Margin to mb-3 -->
+            <div id="visual-area" class="w-full flex flex-col items-center shrink-0 relative z-0 mb-3">
+                <div id="country-silhouette" class="skyline-silhouette"></div>
+                <div id="island-base">
+                    <div id="tower-stack" class="blocks-container"></div>
+                </div>
+            </div>
+
+            <!-- Interaction Area (Question & Answers) -->
+            <div id="interaction-area" class="w-full px-3 pb-6 z-10 shrink-0 flex justify-center">
+                <div class="glass-panel w-full max-w-lg rounded-[2.5rem] p-3 md:p-4 flex flex-col items-center relative overflow-visible shadow-2xl">
+                    
+                    <button id="btn-hint" onclick="showHint()" class="absolute -top-5 -right-1 w-12 h-12 bg-gradient-to-br from-indigo-400 to-violet-500 rounded-full border-2 border-white text-white font-game text-xl shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-transform z-20">
+                        ?
+                    </button>
+
+                    <!-- Active Powerups HUD -->
+                    <div class="w-full flex justify-between items-end mb-2 px-1">
+                        <div class="flex gap-2 items-center min-h-[24px]">
+                            <!-- Shield Indicator -->
+                            <div id="hud-shield" class="hidden text-xl drop-shadow-md transition-all" title="Streak Protected">🛡️</div>
+                            <!-- 2x Indicator -->
+                            <div id="hud-2x" class="hidden bg-gradient-to-r from-yellow-300 to-orange-400 text-white text-[11px] font-black px-2 py-0.5 rounded-lg shadow-sm border border-yellow-200">
+                                ⚡ x2 (<span id="hud-2x-turns">0</span>)
+                            </div>
+                        </div>
+                        <!-- Scissors Use Button -->
+                        <button id="btn-use-scissors" onclick="useScissors()" class="hidden bg-gradient-to-b from-indigo-400 to-indigo-600 border border-white text-white text-[10px] uppercase font-black px-3 py-1.5 rounded-xl shadow-sm active:scale-95 transition-all">
+                            ✂️ Use (x<span id="hud-scissors-count">0</span>)
+                        </button>
+                    </div>
+
+                    <div id="pedagogical-step-label" class="bg-indigo-100 text-indigo-700 font-extrabold text-[10px] md:text-[11px] uppercase tracking-wider px-3.5 py-1 rounded-full mb-2 md:mb-3 shadow-inner text-center">
+                        Step 1/2: Find Past Simple (V2)
+                    </div>
+
+                    <!-- Gold Timer UI (Hidden normally) -->
+                    <div id="gold-timer-container" class="hidden w-full mb-3 px-2">
+                        <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden shadow-inner relative">
+                            <div id="gold-timer-fill" class="h-full bg-gradient-to-r from-yellow-300 to-yellow-500 timer-bar w-full"></div>
+                        </div>
+                    </div>
+
+                    <!-- Single Line Container -->
+                    <div id="question-container" class="flex flex-row flex-nowrap items-center justify-center gap-1 md:gap-2 mb-4 w-full px-1">
+                        <!-- Dynamic sequence -->
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 md:gap-3 w-full" id="answers-grid"></div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-backdrop" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden flex-col items-center justify-center p-4 transition-opacity duration-300" onclick="if(event.target === this) closeAllModals()">
+        
+        <!-- Main Hub Menu -->
+        <div id="pause-modal" class="hidden relative w-full max-w-sm flex-col items-center bg-white rounded-[2rem] p-6 border-b-8 border-gray-200 shadow-2xl" onclick="event.stopPropagation()">
+            <h2 class="font-game text-4xl text-slate-800 mb-5 text-center drop-shadow-sm">Main Menu</h2>
+            
+            <div class="hub-grid mb-5">
+                <button onclick="openModal('shop-modal')" class="btn-3d hub-btn" style="background: linear-gradient(to bottom, #FBBFCA, #D67A8C); --shadow-color: #A34E5E; border: 2px solid white;">
+                    <span class="text-3xl mb-1">🛒</span> Shop
+                </button>
+                <button onclick="openModal('missions-modal')" class="btn-3d hub-btn" style="background: linear-gradient(to bottom, #6BE3B4, #2A9D6A); --shadow-color: #1F7A55; border: 2px solid white;">
+                    <span class="text-3xl mb-1">🎯</span> Missions
+                </button>
+                <button onclick="openModal('spin-modal')" class="btn-3d hub-btn relative opacity-80" style="background: linear-gradient(to bottom, #FFD23F, #D49A00); --shadow-color: #8A6600; border: 2px solid white;">
+                    <div class="absolute -top-2 -right-2 bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-lg transform rotate-12 shadow-sm border border-white z-10 font-bold uppercase animate-pulse">SOON</div>
+                    <span class="text-3xl mb-1">🎡</span> Spin
+                </button>
+            </div>
+
+            <button onclick="closeAllModals()" class="btn-3d btn-play w-full py-3 text-xl text-white text-stroke mb-3">Resume Game</button>
+            <div class="flex gap-3 w-full mb-3">
+                <button onclick="openModal('instructions-modal')" class="btn-3d flex-1 py-3 text-base text-white text-stroke" style="background: #FBBFCA; --shadow-color: #D67A8C; border: 2px solid white;">How to Play</button>
+                <button onclick="toggleAudioDemo()" id="btn-sound-toggle" class="btn-3d flex-1 py-3 text-base text-white text-stroke" style="background: #9FD7F2; --shadow-color: #317296; border: 2px solid white;">Sound 🔊</button>
+            </div>
+            <button onclick="confirmResetFromPause()" class="text-slate-400 font-bold text-xs underline">Reset Progress</button>
+        </div>
+
+        <!-- Shop Modal -->
+        <div id="shop-modal" class="hidden relative w-full max-w-sm flex-col items-center bg-white rounded-[2rem] p-5 border-b-8 border-gray-200 shadow-2xl" onclick="event.stopPropagation()">
+            <button onclick="backToPauseOrClose()" class="absolute top-4 right-4 text-gray-400 hover:text-rose-500 font-black text-2xl z-10">✕</button>
+            
+            <div class="flex justify-between items-center w-full mb-4 px-2">
+                <h2 class="font-game text-3xl text-rose-500 drop-shadow-sm">Shop</h2>
+                <div class="bg-amber-100 border border-amber-300 rounded-lg px-2 py-1 font-black text-amber-600 text-sm flex items-center gap-1">
+                    🪙 <span id="shop-coins-display">0</span>
+                </div>
+            </div>
+            
+            <div class="flex flex-col gap-3 w-full">
+                <!-- Scissors -->
+                <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="text-3xl drop-shadow-md">✂️</div>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-slate-700 text-sm">Scissors</span>
+                            <span class="text-xs text-slate-500">Removes 2 wrong answers</span>
+                        </div>
+                    </div>
+                    <button onclick="buyPowerup('scissors', 100)" class="btn-3d bg-indigo-400 text-white font-black px-3 py-2 text-sm shadow-sm hover:bg-indigo-500">
+                        100 🪙
+                    </button>
+                </div>
+                <!-- Shield -->
+                <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="text-3xl drop-shadow-md">🛡️</div>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-slate-700 text-sm">Shield</span>
+                            <span class="text-xs text-slate-500">Protects streak from 1 mistake</span>
+                        </div>
+                    </div>
+                    <button id="btn-buy-shield" onclick="buyPowerup('shield', 200)" class="btn-3d bg-amber-400 text-white font-black px-3 py-2 text-sm shadow-sm hover:bg-amber-500">
+                        200 🪙
+                    </button>
+                </div>
+                <!-- 2x Booster -->
+                <div class="bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="text-3xl drop-shadow-md">⚡</div>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-slate-700 text-sm">Coin Booster</span>
+                            <span class="text-xs text-slate-500">2x Coins for 5 questions</span>
+                        </div>
+                    </div>
+                    <button onclick="buyPowerup('doubleCoins', 300)" class="btn-3d bg-emerald-400 text-white font-black px-3 py-2 text-sm shadow-sm hover:bg-emerald-500">
+                        300 🪙
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spin Modal (Placeholder) -->
+        <div id="spin-modal" class="hidden relative w-full max-w-sm flex-col items-center bg-white rounded-[2rem] p-5 border-b-8 border-gray-200 shadow-2xl" onclick="event.stopPropagation()">
+            <button onclick="backToPauseOrClose()" class="absolute top-4 right-4 text-gray-400 hover:text-amber-500 font-black text-2xl z-10">✕</button>
+            <h2 class="font-game text-3xl text-amber-500 drop-shadow-sm mb-4">Lucky Wheel</h2>
+            <div class="text-center text-6xl animate-spin-slow">🎡</div>
+            <div class="mt-4 font-bold text-slate-500">Coming Soon...</div>
+        </div>
+
+        <!-- Missions Modal -->
+        <div id="missions-modal" class="hidden relative w-full max-w-sm flex-col items-center bg-white rounded-[2rem] p-5 border-b-8 border-gray-200 shadow-2xl" onclick="event.stopPropagation()">
+            <button onclick="backToPauseOrClose()" class="absolute top-4 right-4 text-gray-400 hover:text-emerald-500 font-black text-2xl z-10">✕</button>
+            <h2 class="font-game text-3xl text-emerald-600 drop-shadow-sm mb-4">Daily Missions</h2>
+            <div id="missions-list" class="w-full flex flex-col gap-3 max-h-[50vh] overflow-y-auto pr-1 pb-2"></div>
+        </div>
+
+        <!-- Moon Active Style SAGA MAP Modal -->
+        <div id="map-modal" class="hidden relative w-full max-w-md flex-col items-center h-[85vh]" onclick="event.stopPropagation()">
+            <div class="w-full flex justify-between items-center mb-2 px-2">
+                <h2 class="font-game text-4xl text-stroke text-white drop-shadow-lg">SAGA MAP</h2>
+                <button id="map-modal-close-btn" onclick="closeAllModals()" class="text-white text-2xl font-black drop-shadow-md bg-black/30 rounded-full w-10 h-10 flex items-center justify-center hover:bg-black/50">✕</button>
+            </div>
+            <div class="w-full flex items-center gap-2 mb-3 px-2">
+                <div class="flex-1 h-2.5 bg-white/30 rounded-full overflow-hidden">
+                    <div id="map-progress-fill" class="h-full bg-gradient-to-r from-emerald-300 to-emerald-500 rounded-full transition-all duration-500" style="width:0%"></div>
+                </div>
+                <span id="map-progress-label" class="text-white text-xs font-black drop-shadow-sm whitespace-nowrap">0/15 🏙️</span>
+            </div>
+            
+            <div class="map-container relative" id="saga-map">
+                <div class="map-bg-elements"></div>
+                <svg id="map-svg-path"></svg>
+                <div id="player-avatar">🧑‍🚀</div>
+                <div id="map-nodes-container" class="w-full flex flex-col-reverse items-center relative z-10 pt-10 pb-16"></div>
+                <div id="map-toast" class="hidden absolute left-1/2 -translate-x-1/2 top-4 z-30 bg-black/70 text-white text-xs font-bold px-3 py-1.5 rounded-full whitespace-nowrap shadow-lg"></div>
+                <button id="btn-jump-current" onclick="positionAvatarOnMap(state.countryIndex, state.cityIndex, true)" class="absolute bottom-3 right-3 z-20 bg-white/95 text-slate-700 text-xs font-black px-3 py-2 rounded-full shadow-lg flex items-center gap-1">📍 Jump to me</button>
+            </div>
+            
+            <button id="btn-continue-journey" onclick="closeAllModals(true); nextQuestion();" class="hidden btn-3d btn-play w-full py-4 text-2xl text-white text-stroke mt-4 shadow-xl">
+                CONTINUE JOURNEY 🚀
+            </button>
+        </div>
+
+        <!-- City Complete Chest -->
+        <div id="chest-modal" class="hidden relative w-full max-w-sm flex-col items-center justify-center" onclick="event.stopPropagation()">
+            <div class="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.8)_0%,transparent_70%)] rounded-full h-[400px] w-[400px] -left-10 -top-10 animate-spin-slow" style="animation-duration: 8s;"></div>
+            
+            <div class="relative z-10 text-center flex flex-col items-center bg-white p-6 rounded-[2.5rem] shadow-2xl border-b-8 border-gray-200 w-full" style="animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                <div class="mb-2 text-7xl" style="animation: bounce-subtle 2s infinite;">🎁</div>
+                <h2 class="font-game text-2xl text-[#FF6B6B] mb-2 text-stroke-sm">City Completed!</h2>
+                <p id="chest-complete-subtitle" class="text-slate-600 font-bold mb-3">You built an amazing tower in Paris!</p>
+                <div class="bg-[#FFF4D0] rounded-2xl p-3 w-full mt-2 border-2 border-[#FFD23F]">
+                    <div class="flex items-center justify-center gap-2 text-3xl">
+                        <span>🪙</span><span class="font-game text-[#D49A00]">+500</span>
+                    </div>
+                </div>
+                <button onclick="claimChestAndMoveMap()" class="btn-3d btn-play w-full py-4 text-xl text-white text-stroke mt-4">
+                    CLAIM & CONTINUE
+                </button>
+            </div>
+        </div>
+
+        <!-- Dictionary Modal -->
+        <div id="hint-modal" class="hidden relative w-full max-w-sm bg-white rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-indigo-100 flex-col" onclick="event.stopPropagation()">
+            <div class="bg-gradient-to-r from-indigo-500 to-violet-500 p-4 relative text-center border-b-4 border-indigo-700 shrink-0">
+                <button onclick="closeAllModals()" class="absolute top-4 right-4 text-white/70 hover:text-white font-black text-xl">✕</button>
+                <div class="text-4xl mb-1 drop-shadow-md">📖</div>
+                <h3 class="font-game text-2xl text-white text-stroke-sm">Dictionary</h3>
+            </div>
+            
+            <div class="p-5 flex flex-col gap-4 items-center text-center w-full bg-white overflow-y-auto">
+                <div class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-4 flex flex-col items-center shadow-sm">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Base Verb (V1)</span>
+                    <span id="hint-v1" class="font-game text-4xl text-slate-800 drop-shadow-sm">get</span>
+                </div>
+                <div class="w-full bg-indigo-50 border-2 border-indigo-100 rounded-2xl p-4 flex flex-col items-center shadow-sm">
+                    <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Translation</span>
+                    <span id="hint-translation" class="font-hebrew text-2xl font-black text-indigo-700" dir="rtl">לקבל / להשיג</span>
+                </div>
+                <div class="w-full bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 text-left flex flex-col shadow-sm">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-lg">💡</span>
+                        <span class="text-[10px] font-black text-amber-600 uppercase">Example Sentence</span>
+                    </div>
+                    <div id="hint-example" class="font-ui font-bold text-slate-700 italic text-[15px] leading-snug">"I usually get up at 7 AM."</div>
+                </div>
+            </div>
+            
+            <button onclick="closeAllModals()" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-500 font-black py-4 transition-colors border-t-2 border-slate-200 text-lg shrink-0">
+                Got it!
+            </button>
+        </div>
+
+        <!-- Country Flight Overlay -->
+        <div id="country-welcome-modal" class="hidden relative w-full max-w-sm flex-col items-center justify-center text-center p-6 bg-white rounded-[2.5rem] shadow-2xl border-b-8 border-slate-200" onclick="event.stopPropagation()">
+            <div class="text-7xl mb-4 drop-shadow-md">✈️🗺️</div>
+            <h2 class="font-game text-4xl text-indigo-600 mb-2 drop-shadow-sm">Touchdown!</h2>
+            <p class="text-lg text-slate-600 font-extrabold mb-4">
+                Welcome to <span id="welcome-country-flag"></span> <span id="welcome-country-name" class="text-indigo-600"></span>!
+            </p>
+            <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 w-full mb-4">
+                <p class="text-slate-500 text-sm font-semibold">Explore 3 new cities and build amazing landmarks on your journey!</p>
+            </div>
+            <button onclick="closeAllModals(true); nextQuestion();" class="btn-3d btn-play w-full py-4 text-2xl text-white text-stroke">
+                LET'S EXPLORE 🚀
+            </button>
+        </div>
+
+        <!-- Instructions -->
+        <div id="instructions-modal" class="hidden relative w-full max-w-sm flex-col items-center bg-white rounded-[2rem] p-6 border-b-8 border-gray-200 shadow-2xl" onclick="event.stopPropagation()">
+            <button onclick="backToPauseOrClose()" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 font-black text-2xl z-10">✕</button>
+            <div class="text-center w-full mb-5 mt-2">
+                <h2 class="font-game text-4xl text-indigo-600 drop-shadow-sm mb-1">How To Play</h2>
+                <p class="text-slate-500 font-bold text-sm">Master verbs and build the world</p>
+            </div>
+            <div class="flex flex-col gap-3 w-full text-left max-h-[50vh] overflow-y-auto pb-2 pr-1">
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 flex gap-3 items-start shadow-sm">
+                    <div class="text-2xl mt-1">🎮</div>
+                    <p class="text-slate-700 text-sm font-semibold leading-tight">
+                        <span class="font-black text-blue-700 block mb-1">Gameplay</span>
+                        Choose the correct verb form. Start with Base (V1), find Past Simple (V2), then Past Participle (V3). Watch out for GOLD Rounds!
+                    </p>
+                </div>
+                <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex gap-3 items-start shadow-sm">
+                    <div class="text-2xl mt-1">🗺️</div>
+                    <p class="text-slate-700 text-sm font-semibold leading-tight">
+                        <span class="font-black text-emerald-700 block mb-1">Saga Map</span>
+                        Every 10 correct answers builds a tower. Complete 3 towers to finish a country and fly to the next destination!
+                    </p>
+                </div>
+                <div class="bg-orange-50 border border-orange-100 rounded-xl p-3 flex gap-3 items-start shadow-sm">
+                    <div class="text-2xl mt-1">🔥</div>
+                    <p class="text-slate-700 text-sm font-semibold leading-tight">
+                        <span class="font-black text-orange-600 block mb-1">Fever & Shop</span>
+                        Answer 5 in a row for a x5 Coin Bonus! Use the <b>Shop</b> to buy Scissors, Shields, and Coin Boosters.
+                    </p>
+                </div>
+            </div>
+            <button onclick="backToPauseOrClose()" class="btn-3d btn-play w-full py-4 text-xl text-white text-stroke mt-4 shrink-0">
+                GOT IT, LET'S PLAY!
+            </button>
+        </div>
+    </div>
+
+    <!-- Plane Animation Element -->
+    <style>
+        .flight-plane { position: fixed; top: 40%; left: -100px; font-size: 5rem; z-index: 99; pointer-events: none; display: none; }
+        .flight-plane.active { display: block; animation: flyAcrossLTR 2.5s ease-in-out forwards; }
+        @keyframes flyAcrossLTR {
+            0% { transform: translate(-20vw, 100px) rotate(-15deg) scale(0.5); opacity: 0; }
+            50% { transform: translate(50vw, -20px) rotate(0deg) scale(1.5); opacity: 1; }
+            100% { transform: translate(120vw, -150px) rotate(15deg) scale(0.8); opacity: 0; }
+        }
+    </style>
+    <div id="anim-plane" class="flight-plane">✈️</div>
+
+    <script>
+        // --- Verb Database ---
+        const verbsDb = [
+            { v1: 'be', v2: 'was/were', v3: 'been', he: 'להיות', diff: 1, ex: 'I want to be a doctor when I grow up.' },
+            { v1: 'do', v2: 'did', v3: 'done', he: 'לעשות', diff: 1, ex: 'I always do my homework after dinner.' },
+            { v1: 'go', v2: 'went', v3: 'gone', he: 'ללכת', diff: 1, ex: 'Let\'s go to the park this afternoon.' },
+            { v1: 'see', v2: 'saw', v3: 'seen', he: 'לראות', diff: 1, ex: 'I can see the mountains from my window.' },
+            { v1: 'eat', v2: 'ate', v3: 'eaten', he: 'לאכול', diff: 1, ex: 'We usually eat breakfast at 8 AM.' },
+            { v1: 'make', v2: 'made', v3: 'made', he: 'להכין / לעשות', diff: 1, ex: 'She will make a cake for the party.' },
+            { v1: 'take', v2: 'took', v3: 'taken', he: 'לקחת', diff: 1, ex: 'Remember to take your umbrella today.' },
+            { v1: 'say', v2: 'said', v3: 'said', he: 'לומר', diff: 1, ex: 'What did he say to you?' },
+            { v1: 'get', v2: 'got', v3: 'gotten', he: 'לקבל / להשיג', diff: 1, ex: 'She will get a new bike for her birthday.' },
+            { v1: 'have', v2: 'had', v3: 'had', he: 'להיות בעל / יש לו', diff: 1, ex: 'They have a new puppy at home.' },
+            { v1: 'come', v2: 'came', v3: 'come', he: 'לבוא', diff: 1, ex: 'Please come to my party on Friday.' },
+            { v1: 'give', v2: 'gave', v3: 'given', he: 'לתת', diff: 1, ex: 'I will give you the book tomorrow.' },
+            { v1: 'think', v2: 'thought', v3: 'thought', he: 'לחשוב', diff: 1, ex: 'I think it will rain tomorrow.' },
+            { v1: 'tell', v2: 'told', v3: 'told', he: 'לספר', diff: 1, ex: 'She will tell us a story tonight.' },
+            { v1: 'feel', v2: 'felt', v3: 'felt', he: 'להרגיש', diff: 1, ex: 'I feel happy when the sun is shining.' },
+            { v1: 'leave', v2: 'left', v3: 'left', he: 'לעזוב', diff: 1, ex: 'We leave for school at eight o\'clock.' },
+            { v1: 'put', v2: 'put', v3: 'put', he: 'לשים', diff: 1, ex: 'Please put your shoes by the door.' },
+            { v1: 'run', v2: 'ran', v3: 'run', he: 'לרוץ', diff: 1, ex: 'The children run in the park every day.' },
+            
+            { v1: 'break', v2: 'broke', v3: 'broken', he: 'לשבור', diff: 2, ex: 'Please do not break the fragile glass.' },
+            { v1: 'build', v2: 'built', v3: 'built', he: 'לבנות', diff: 2, ex: 'They build a new school every year.' },
+            { v1: 'buy', v2: 'bought', v3: 'bought', he: 'לקנות', diff: 2, ex: 'I will buy some fresh apples at the market.' },
+            { v1: 'catch', v2: 'caught', v3: 'caught', he: 'לתפוס', diff: 2, ex: 'Can you catch the ball?' },
+            { v1: 'find', v2: 'found', v3: 'found', he: 'למצוא', diff: 2, ex: 'I hope I find my lost keys soon.' },
+            { v1: 'fly', v2: 'flew', v3: 'flown', he: 'לעוף / לטוס', diff: 2, ex: 'Birds fly south for the winter.' },
+            { v1: 'know', v2: 'knew', v3: 'known', he: 'לדעת / להכיר', diff: 2, ex: 'Do you know the answer to this question?' },
+            { v1: 'write', v2: 'wrote', v3: 'written', he: 'לכתוב', diff: 2, ex: 'I write a letter to my grandmother every week.' },
+            { v1: 'choose', v2: 'chose', v3: 'chosen', he: 'לבחור', diff: 2, ex: 'You must choose one of the options.' },
+            { v1: 'drive', v2: 'drove', v3: 'driven', he: 'לנהוג', diff: 2, ex: 'I drive my car to work every day.' },
+            { v1: 'speak', v2: 'spoke', v3: 'spoken', he: 'לדבר', diff: 2, ex: 'She can speak three languages fluently.' },
+            { v1: 'wear', v2: 'wore', v3: 'worn', he: 'ללבוש', diff: 2, ex: 'He will wear a suit to the wedding.' },
+            { v1: 'sell', v2: 'sold', v3: 'sold', he: 'למכור', diff: 2, ex: 'They sell fresh fruit at the market.' },
+            { v1: 'send', v2: 'sent', v3: 'sent', he: 'לשלוח', diff: 2, ex: 'I will send you an email later.' },
+            { v1: 'spend', v2: 'spent', v3: 'spent', he: 'לבזבז / להעביר', diff: 2, ex: 'We spend our summers at the beach.' },
+            { v1: 'stand', v2: 'stood', v3: 'stood', he: 'לעמוד', diff: 2, ex: 'Please stand up when the teacher enters.' },
+            { v1: 'sit', v2: 'sat', v3: 'sat', he: 'לשבת', diff: 2, ex: 'She likes to sit by the window.' },
+            { v1: 'sing', v2: 'sang', v3: 'sung', he: 'לשיר', diff: 2, ex: 'The birds sing every morning.' },
+            { v1: 'swim', v2: 'swam', v3: 'swum', he: 'לשחות', diff: 2, ex: 'We swim in the lake every summer.' },
+            { v1: 'ride', v2: 'rode', v3: 'ridden', he: 'לרכב', diff: 2, ex: 'I ride my bike to school every day.' },
+            { v1: 'fall', v2: 'fell', v3: 'fallen', he: 'ליפול', diff: 2, ex: 'Be careful not to fall on the ice.' },
+            { v1: 'grow', v2: 'grew', v3: 'grown', he: 'לגדול', diff: 2, ex: 'These flowers grow very fast in spring.' },
+            { v1: 'draw', v2: 'drew', v3: 'drawn', he: 'לצייר', diff: 2, ex: 'She likes to draw pictures of animals.' },
+            { v1: 'throw', v2: 'threw', v3: 'thrown', he: 'לזרוק', diff: 2, ex: 'He will throw the ball to his friend.' },
+            { v1: 'lose', v2: 'lost', v3: 'lost', he: 'לאבד / להפסיד', diff: 2, ex: 'Do not lose your ticket before the show.' },
+            { v1: 'teach', v2: 'taught', v3: 'taught', he: 'ללמד', diff: 2, ex: 'My mother will teach me how to cook.' },
+
+            { v1: 'arise', v2: 'arose', v3: 'arisen', he: 'לעלות / להתעורר', diff: 3, ex: 'Problems may arise if we are not careful.' },
+            { v1: 'forbid', v2: 'forbade', v3: 'forbidden', he: 'לאסור', diff: 3, ex: 'The rules forbid using phones during the test.' },
+            { v1: 'forgive', v2: 'forgave', v3: 'forgiven', he: 'לסלוח', diff: 3, ex: 'I will forgive him for his mistake.' },
+            { v1: 'freeze', v2: 'froze', v3: 'frozen', he: 'לקפוא / להקפיא', diff: 3, ex: 'Water will freeze at zero degrees.' },
+            { v1: 'hide', v2: 'hid', v3: 'hidden', he: 'להחביא / להתחבא', diff: 3, ex: 'Where did you hide the treasure?' },
+            { v1: 'shrink', v2: 'shrank', v3: 'shrunk', he: 'להתכווץ', diff: 3, ex: 'The shirt will shrink if you wash it in hot water.' },
+            { v1: 'swear', v2: 'swore', v3: 'sworn', he: 'להישבע / לקלל', diff: 3, ex: 'I swear I am telling the truth.' },
+            { v1: 'bear', v2: 'bore', v3: 'born', he: 'לשאת / ללדת', diff: 3, ex: 'She could not bear the cold weather.' },
+            { v1: 'bind', v2: 'bound', v3: 'bound', he: 'לכרוך / לחייב', diff: 3, ex: 'This contract will bind both companies.' },
+            { v1: 'bite', v2: 'bit', v3: 'bitten', he: 'לנשוך', diff: 3, ex: 'The dog did not bite the mailman.' },
+            { v1: 'blow', v2: 'blew', v3: 'blown', he: 'לנשוב', diff: 3, ex: 'The wind will blow strongly tonight.' },
+            { v1: 'dig', v2: 'dug', v3: 'dug', he: 'לחפור', diff: 3, ex: 'The dog likes to dig holes in the garden.' },
+            { v1: 'fight', v2: 'fought', v3: 'fought', he: 'להילחם', diff: 3, ex: 'The soldiers had to fight bravely.' },
+            { v1: 'hang', v2: 'hung', v3: 'hung', he: 'לתלות', diff: 3, ex: 'She will hang the picture on the wall.' },
+            { v1: 'lay', v2: 'laid', v3: 'laid', he: 'להניח', diff: 3, ex: 'Please lay the papers on the desk.' },
+            { v1: 'lead', v2: 'led', v3: 'led', he: 'להוביל', diff: 3, ex: 'She will lead the team to victory.' },
+            { v1: 'lend', v2: 'lent', v3: 'lent', he: 'להלוות', diff: 3, ex: 'Can you lend me some money?' },
+            { v1: 'ring', v2: 'rang', v3: 'rung', he: 'לצלצל', diff: 3, ex: 'The phone will ring soon.' },
+            { v1: 'rise', v2: 'rose', v3: 'risen', he: 'לעלות / לזרוח', diff: 3, ex: 'The sun will rise at six tomorrow.' },
+            { v1: 'seek', v2: 'sought', v3: 'sought', he: 'לחפש', diff: 3, ex: 'They seek a better life abroad.' },
+            { v1: 'shake', v2: 'shook', v3: 'shaken', he: 'לרעוד / לנער', diff: 3, ex: 'The ground began to shake during the quake.' },
+            { v1: 'shine', v2: 'shone', v3: 'shone', he: 'לזרוח', diff: 3, ex: 'The stars shine brightly at night.' },
+            { v1: 'shoot', v2: 'shot', v3: 'shot', he: 'לירות / לצלם', diff: 3, ex: 'The photographer will shoot the wedding.' },
+            { v1: 'sink', v2: 'sank', v3: 'sunk', he: 'לשקוע', diff: 3, ex: 'The old ship began to sink slowly.' },
+            { v1: 'spin', v2: 'spun', v3: 'spun', he: 'לסובב', diff: 3, ex: 'The wheels started to spin on the ice.' },
+            { v1: 'spring', v2: 'sprang', v3: 'sprung', he: 'לקפוץ', diff: 3, ex: 'The cat will spring onto the table.' },
+            { v1: 'steal', v2: 'stole', v3: 'stolen', he: 'לגנוב', diff: 3, ex: 'Someone tried to steal her bicycle.' },
+            { v1: 'sting', v2: 'stung', v3: 'stung', he: 'לעקוץ', diff: 3, ex: 'Bees will sting if they feel threatened.' },
+            { v1: 'strike', v2: 'struck', v3: 'struck', he: 'להכות / לפגוע', diff: 3, ex: 'Lightning did not strike the tower.' },
+            { v1: 'sweep', v2: 'swept', v3: 'swept', he: 'לטאטא', diff: 3, ex: 'She will sweep the floor after dinner.' },
+            { v1: 'weep', v2: 'wept', v3: 'wept', he: 'לבכות', diff: 3, ex: 'The child began to weep quietly.' },
+            { v1: 'wind', v2: 'wound', v3: 'wound', he: 'לפתל / להסתובב', diff: 3, ex: 'The road will wind through the mountains.' }
+        ];
+
+        const travelDestinations = [
+            { name: 'France', flag: '🇫🇷', cities: ['Paris', 'Marseille', 'Lyon'], accentColor: '#A3E2D1', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><path d="M50 5 L47 25 L45 50 L35 90 L20 95 L15 100 L85 100 L80 95 L65 90 L55 50 L53 25 Z"/></svg>` },
+            { name: 'Spain', flag: '🇪🇸', cities: ['Madrid', 'Barcelona', 'Seville'], accentColor: '#FED766', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><circle cx="50" cy="30" r="15"/><rect x="40" y="45" width="20" height="55"/><rect x="25" y="60" width="50" height="40"/></svg>` },
+            { name: 'UK', flag: '🇬🇧', cities: ['London', 'Manchester', 'Edinburgh'], accentColor: '#9FD7F2', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><rect x="42" y="10" width="16" height="90"/><path d="M50 0 L40 10 L60 10 Z"/><circle cx="50" cy="25" r="5" fill="white"/></svg>` },
+            { name: 'Italy', flag: '🇮🇹', cities: ['Rome', 'Venice', 'Florence'], accentColor: '#BCEE9B', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><ellipse cx="50" cy="60" rx="35" ry="25"/><rect x="15" y="60" width="70" height="40"/></svg>` },
+            { name: 'Japan', flag: '🇯🇵', cities: ['Tokyo', 'Kyoto', 'Osaka'], accentColor: '#FBBFCA', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><path d="M10 90 L50 20 L90 90 Z"/><circle cx="50" cy="45" r="12" fill="red" opacity="0.3"/></svg>` }
+        ];
+
+        const missionTemplates = [
+            { id: 'm_ans10', type: 'answers', target: 10, title: 'Answer 10 verbs correctly', reward: 100 },
+            { id: 'm_ans25', type: 'answers', target: 25, title: 'Answer 25 verbs correctly', reward: 250 },
+            { id: 'm_fev2', type: 'fever', target: 2, title: 'Reach Fever mode 2 times', reward: 150 },
+            { id: 'm_fev5', type: 'fever', target: 5, title: 'Reach Fever mode 5 times', reward: 300 },
+            { id: 'm_tow1', type: 'towers', target: 1, title: 'Build 1 complete tower', reward: 200 },
+            { id: 'm_gld1', type: 'gold', target: 1, title: 'Win a Gold Round', reward: 400 }
+        ];
+
+        const blockColors = ['#FBBFCA', '#FCE2B6', '#E4F4C1', '#BCEE9B', '#A2EDD5', '#9FD7F2', '#D8C3F5'];
+        const praises = ['AWESOME!', 'PERFECT!', 'AMAZING!', 'SPOT ON!', 'GENIUS!'];
+
+        // --- Game State ---
+        let state = {
+            coins: 100, gems: 0, xp: 0, level: 1, streak: 0, blocks: 0,
+            countryIndex: 0, cityIndex: 0,
+            isFever: false, isGoldRound: false, pendingGoldPrompt: false,
+            isTransitioningLevel: false, 
+            goldTimer: null, goldTimeLeft: 15,
+            
+            // Gold Round Logic limits
+            goldRoundsInCountry: 0,
+            verbsSinceLastGold: 5, // Starts at 5 so it's ready once cityIndex > 0
+            
+            usedVerbIds: [],
+            missions: [],
+            currentVerb: null, currentStep: 'v2',
+            correctAnswer: null, isAnswering: false, soundOn: true,
+            
+            // Powerups
+            inventory: { scissors: 0 },
+            activeShield: false,
+            doubleCoinTurns: 0
+        };
+
+        const FEVER_THRESHOLD = 5;
+        const BLOCKS_PER_TOWER = 10;
+        const BASE_COINS = 10;
+        
+        const getEl = id => document.getElementById(id);
+        const randItem = arr => arr[Math.floor(Math.random() * arr.length)];
+        const shuffle = arr => arr.sort(() => Math.random() - 0.5);
+
+        // --- Save / Load ---
+        const SAVE_KEY = 'vbuilding_save_v1';
+        const SAVED_FIELDS = ['coins', 'gems', 'xp', 'level', 'countryIndex', 'cityIndex',
+            'goldRoundsInCountry', 'verbsSinceLastGold', 'usedVerbIds', 'missions',
+            'inventory', 'activeShield', 'doubleCoinTurns', 'soundOn'];
+
+        function saveGame() {
+            try {
+                const toSave = {};
+                SAVED_FIELDS.forEach(key => { toSave[key] = state[key]; });
+                localStorage.setItem(SAVE_KEY, JSON.stringify(toSave));
+            } catch(e) { console.warn('Save skipped', e); }
+        }
+
+        function loadGame() {
+            try {
+                const raw = localStorage.getItem(SAVE_KEY);
+                if (!raw) return false;
+                const saved = JSON.parse(raw);
+                SAVED_FIELDS.forEach(key => {
+                    if (saved[key] !== undefined) state[key] = saved[key];
+                });
+                return true;
+            } catch(e) { console.warn('Load skipped', e); return false; }
+        }
+
+        function resetGame() {
+            try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+            location.reload();
+        }
+
+        function confirmNewGame() {
+            if (confirm('Start a new game? Your current progress (coins, level, and map) will be lost.')) {
+                resetGame();
+            }
+        }
+
+        function confirmResetFromPause() {
+            if (confirm('Reset all progress? Coins, level, and map progress will be lost. This cannot be undone.')) {
+                resetGame();
+            }
+        }
+
+        // --- Init & Missions ---
+        function initMissions() {
+            if(state.missions.length === 0) generateMissions();
+            renderMissions();
+        }
+
+        function generateMissions() {
+            const shuffled = shuffle([...missionTemplates]);
+            state.missions = shuffled.slice(0, 3).map(m => ({...m, progress: 0, completed: false}));
+        }
+
+        function updateMissionProgress(type, amount = 1) {
+            let anyUpdated = false, allThreeCompleted = true;
+            state.missions.forEach(m => {
+                if(!m.completed && m.type === type) {
+                    m.progress += amount;
+                    if(m.progress >= m.target) {
+                        m.progress = m.target; m.completed = true;
+                        state.coins += m.reward; animateScore();
+                    }
+                    anyUpdated = true;
+                }
+                if (!m.completed) allThreeCompleted = false;
+            });
+            if (allThreeCompleted) { generateMissions(); anyUpdated = true; }
+            if (anyUpdated) { renderMissions(); saveGame(); }
+        }
+
+        function renderMissions() {
+            const list = getEl('missions-list');
+            if(!list) return;
+            list.innerHTML = '';
+            state.missions.forEach(m => {
+                const isComp = m.completed;
+                const card = document.createElement('div');
+                card.className = `mission-card bg-slate-50 border-2 ${isComp ? 'border-emerald-300 bg-emerald-50' : 'border-slate-200'} rounded-2xl p-3 flex items-center justify-between shadow-sm transition-all`;
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="text-2xl">${isComp ? '✅' : '🎯'}</div>
+                        <div class="flex flex-col"><span class="mission-title font-bold text-slate-700 text-sm">${m.title}</span><span class="text-xs font-black text-amber-500">💰 +${m.reward} Coins</span></div>
+                    </div>
+                    <div class="font-game text-xl ${isComp ? 'text-emerald-500' : 'text-slate-400'}">${isComp ? 'DONE' : `${m.progress}/${m.target}`}</div>`;
+                list.appendChild(card);
+            });
+            list.scrollTop = list.scrollHeight;
+        }
+
+        // --- Shop & Powerups ---
+        function updatePowerupUI() {
+            const btnScis = getEl('btn-use-scissors');
+            if(btnScis) {
+                if (state.inventory.scissors > 0 && !state.isGoldRound) {
+                    btnScis.classList.remove('hidden');
+                    getEl('hud-scissors-count').innerText = state.inventory.scissors;
+                    btnScis.disabled = false;
+                } else {
+                    btnScis.classList.add('hidden');
+                }
+            }
+
+            const shieldEl = getEl('hud-shield');
+            if(shieldEl) {
+                if (state.activeShield) shieldEl.classList.remove('hidden');
+                else shieldEl.classList.add('hidden');
+            }
+
+            const doubleEl = getEl('hud-2x');
+            if(doubleEl) {
+                if (state.doubleCoinTurns > 0) {
+                    doubleEl.classList.remove('hidden');
+                    getEl('hud-2x-turns').innerText = state.doubleCoinTurns;
+                } else {
+                    doubleEl.classList.add('hidden');
+                }
+            }
+
+            const shopDisplay = getEl('shop-coins-display');
+            if(shopDisplay) shopDisplay.innerText = state.coins;
+            
+            const buyShieldBtn = getEl('btn-buy-shield');
+            if(buyShieldBtn) {
+                buyShieldBtn.disabled = state.activeShield;
+                if (state.activeShield) buyShieldBtn.innerText = 'ACTIVE';
+                else buyShieldBtn.innerText = '200 🪙';
+            }
+        }
+
+        function buyPowerup(type, cost) {
+            if (state.coins < cost) return; 
+            
+            if (type === 'scissors') {
+                state.coins -= cost;
+                state.inventory.scissors++;
+            } else if (type === 'shield') {
+                if (state.activeShield) return; 
+                state.coins -= cost;
+                state.activeShield = true;
+            } else if (type === 'doubleCoins') {
+                state.coins -= cost;
+                state.doubleCoinTurns += 5;
+            }
+            
+            animateScore();
+            updatePowerupUI();
+            saveGame();
+        }
+
+        function useScissors() {
+            if (state.inventory.scissors <= 0 || state.isAnswering || state.isGoldRound) return;
+            
+            state.inventory.scissors--;
+            updatePowerupUI();
+            saveGame();
+            
+            const grid = getEl('answers-grid');
+            let wrongBtns = Array.from(grid.children).filter(btn => btn.innerText.trim() !== state.correctAnswer);
+            
+            wrongBtns = shuffle(wrongBtns).slice(0, 2);
+            wrongBtns.forEach(btn => {
+                btn.style.opacity = '0';
+                btn.style.pointerEvents = 'none';
+            });
+            const btnScis = getEl('btn-use-scissors');
+            if(btnScis) btnScis.disabled = true; 
+        }
+
+        // --- Core Game Flow ---
+        function getNextVerb() {
+            let available = verbsDb.filter(v => !state.usedVerbIds.includes(v.v1));
+            let allowedDiffs = [1];
+            if (state.countryIndex === 1) allowedDiffs = [1, 2];
+            if (state.countryIndex >= 2) allowedDiffs = [2, 3];
+            if (state.countryIndex >= 4) allowedDiffs = [3];
+            
+            let diffFiltered = available.filter(v => allowedDiffs.includes(v.diff));
+            if (diffFiltered.length === 0) diffFiltered = available; 
+            if (diffFiltered.length === 0) {
+                state.usedVerbIds = [];
+                diffFiltered = verbsDb.filter(v => allowedDiffs.includes(v.diff));
+            }
+
+            const picked = randItem(diffFiltered);
+            state.usedVerbIds.push(picked.v1);
+            return picked;
+        }
+
+        function startGame() {
+            const startScreen = getEl('screen-start');
+            if(startScreen) startScreen.style.opacity = '0';
+            initMissions();
+            setTimeout(() => {
+                if(startScreen) startScreen.classList.add('hidden');
+                const gameScreen = getEl('screen-game');
+                if(gameScreen) gameScreen.classList.remove('hidden');
+                updateUI();
+                updatePowerupUI();
+                nextQuestion();
+            }, 500);
+        }
+
+        let modalTimeout;
+        function openModal(id) {
+            const backdrop = getEl('modal-backdrop');
+            if(!backdrop) return;
+            clearTimeout(modalTimeout);
+            backdrop.classList.remove('hidden'); backdrop.style.display = 'flex';
+            Array.from(backdrop.children).forEach(child => { child.classList.add('hidden'); child.classList.remove('flex'); });
+            const target = getEl(id);
+            if(target) { target.classList.remove('hidden'); target.classList.add('flex'); }
+            if (id === 'missions-modal') renderMissions();
+            if (id === 'shop-modal') updatePowerupUI();
+            setTimeout(() => backdrop.style.opacity = '1', 10);
+        }
+
+        function closeAllModals(force = false) {
+            if (state.isTransitioningLevel && !force) return; 
+            
+            const backdrop = getEl('modal-backdrop');
+            if(!backdrop) return;
+            backdrop.style.opacity = '0';
+            clearTimeout(modalTimeout);
+            modalTimeout = setTimeout(() => { backdrop.classList.add('hidden'); backdrop.style.display = 'none'; }, 300);
+        }
+
+        function backToPauseOrClose() {
+            const gameScreen = getEl('screen-game');
+            if (gameScreen && gameScreen.classList.contains('hidden')) closeAllModals();
+            else openModal('pause-modal');
+        }
+
+        function showHint() {
+            if (!state.currentVerb) return;
+            const hintV1 = getEl('hint-v1');
+            const hintTrans = getEl('hint-translation');
+            if(hintV1) hintV1.innerText = state.currentVerb.v1;
+            if(hintTrans) hintTrans.innerText = state.currentVerb.he;
+            
+            let exHtml = state.currentVerb.ex;
+            const wordsToHighlight = [state.currentVerb.v1, state.currentVerb.v2.split('/')[0], state.currentVerb.v3];
+            wordsToHighlight.forEach(w => {
+                const regex = new RegExp(`\\b${w}\\b`, 'gi');
+                exHtml = exHtml.replace(regex, `<span class="text-indigo-600 font-black bg-indigo-100 px-1 rounded">${w}</span>`);
+            });
+            const hintExample = getEl('hint-example');
+            if(hintExample) hintExample.innerHTML = `"${exHtml}"`;
+            openModal('hint-modal');
+        }
+
+        // --- Gold Round ---
+        function renderGoldPrompt() {
+            document.body.classList.add('gold-mode');
+            const btnHint = getEl('btn-hint');
+            if(btnHint) btnHint.classList.add('hidden');
+            
+            const container = getEl('question-container');
+            if(container) {
+                container.innerHTML = `
+                    <div class="text-center w-full py-4">
+                        <h3 class="text-yellow-500 font-game text-3xl md:text-4xl animate-pulse mb-1 drop-shadow-sm text-stroke-sm">🌟 GOLD ROUND 🌟</h3>
+                        <p class="font-ui font-bold text-yellow-800 mt-2 text-sm md:text-lg">Answer in 15 seconds for 10x Coins!</p>
+                        <p class="font-ui font-black text-slate-500 mt-1 uppercase text-xs tracking-widest">Are you ready?</p>
+                    </div>
+                `;
+            }
+            
+            const grid = getEl('answers-grid');
+            if(grid) {
+                grid.innerHTML = `
+                    <button onclick="acceptGold()" class="btn-3d w-full py-5 bg-gradient-to-b from-emerald-400 to-emerald-500 text-white font-game text-2xl" style="--shadow-color: #059669;">
+                        YES! 🚀
+                    </button>
+                    <button onclick="declineGold()" class="btn-3d w-full py-5 bg-gradient-to-b from-rose-400 to-rose-500 text-white font-game text-2xl" style="--shadow-color: #E11D48;">
+                        NO ⏭️
+                    </button>
+                `;
+            }
+        }
+
+        function acceptGold() {
+            state.pendingGoldPrompt = false;
+            state.isGoldRound = true;
+            const goldMsg = getEl('gold-msg');
+            if(goldMsg) goldMsg.classList.remove('hidden');
+            startGoldTimer();
+            nextQuestion(true); 
+        }
+
+        function declineGold() {
+            state.pendingGoldPrompt = false;
+            state.isGoldRound = false;
+            document.body.classList.remove('gold-mode');
+            nextQuestion(true);
+        }
+
+        function startGoldTimer() {
+            state.goldTimeLeft = 15;
+            const goldTimerContainer = getEl('gold-timer-container');
+            if(goldTimerContainer) goldTimerContainer.classList.remove('hidden');
+            
+            const fill = getEl('gold-timer-fill');
+            if(fill) fill.style.width = '100%';
+            
+            clearInterval(state.goldTimer);
+            state.goldTimer = setInterval(() => {
+                state.goldTimeLeft--;
+                if(fill) {
+                    fill.style.width = (state.goldTimeLeft / 15 * 100) + '%';
+                    if (state.goldTimeLeft <= 3) fill.classList.replace('from-yellow-300', 'from-red-500'); 
+                    else fill.classList.replace('from-red-500', 'from-yellow-300');
+                }
+
+                if (state.goldTimeLeft <= 0) {
+                    clearInterval(state.goldTimer);
+                    handleAnswer(null, null, null); 
+                }
+            }, 1000);
+        }
+
+        function nextQuestion(skipPromptCheck = false) {
+            state.isAnswering = false;
+            state.isTransitioningLevel = false; 
+            updatePowerupUI();
+            
+            const btnHint = getEl('btn-hint');
+            if(btnHint) btnHint.classList.remove('hidden');
+
+            if (state.currentStep === 'v2' && !skipPromptCheck) {
+                state.verbsSinceLastGold++;
+                
+                // Logic: Only from 2nd building (cityIndex > 0), Max 2 per country, Gap of at least 5 verbs
+                const canHaveGold = state.cityIndex > 0 && 
+                                    state.goldRoundsInCountry < 2 && 
+                                    state.verbsSinceLastGold >= 6;
+                
+                if (canHaveGold && Math.random() < 0.20) { // 20% Chance since conditions are strict
+                    state.goldRoundsInCountry++;
+                    state.verbsSinceLastGold = 0;
+                    state.pendingGoldPrompt = true;
+                    renderGoldPrompt();
+                    return;
+                }
+            }
+
+            const stepLabel = getEl('pedagogical-step-label');
+
+            if (state.currentStep === 'v2') {
+                state.currentVerb = getNextVerb();
+                if(!state.isGoldRound) {
+                    state.correctAnswer = state.currentVerb.v2;
+                    if(stepLabel) {
+                        stepLabel.innerText = 'Step 1/2: Find Past Simple (V2)';
+                        stepLabel.className = "bg-orange-100 text-orange-700 font-extrabold text-[10px] md:text-[11px] uppercase tracking-wider px-3.5 py-1 rounded-full mb-2 shadow-inner text-center";
+                    }
+                }
+            } else {
+                state.correctAnswer = state.currentVerb.v3;
+                if(stepLabel) {
+                    stepLabel.innerText = 'Step 2/2: Find Past Participle (V3)';
+                    stepLabel.className = "bg-indigo-100 text-indigo-700 font-extrabold text-[10px] md:text-[11px] uppercase tracking-wider px-3.5 py-1 rounded-full mb-2 shadow-inner text-center animate-pulse";
+                }
+            }
+
+            const container = getEl('question-container');
+            const boxBaseClass = "bg-white px-2 py-1.5 md:px-4 md:py-2.5 rounded-xl border-b-[3px] border-slate-200 shadow-sm text-center flex-1 min-w-0";
+            const arrowHtml = `<div class="text-slate-300 font-black text-sm md:text-lg px-0.5 drop-shadow-sm flex-shrink-0">➔</div>`;
+
+            let layoutHtml = '';
+            
+            if (state.isGoldRound) {
+                state.correctAnswer = `${state.currentVerb.v1} - ${state.currentVerb.v2.split('/')[0]}`;
+                if(stepLabel) {
+                    stepLabel.innerText = '🌟 GOLD ROUND: Find V1 & V2 🌟';
+                    stepLabel.className = "bg-yellow-200 text-yellow-800 font-extrabold text-[11px] uppercase tracking-wider px-3.5 py-1 rounded-full mb-3 shadow-md text-center border-2 border-yellow-400 animate-pulse";
+                }
+                
+                layoutHtml = `
+                    <div class="bg-slate-100 px-4 py-3 rounded-xl border-b-[3px] border-slate-300 shadow-sm text-center flex-1 min-w-0 flex flex-col justify-center">
+                        <div class="text-[10px] font-black text-slate-400 uppercase mb-1">Hebrew Meaning</div>
+                        <div class="font-hebrew text-xl md:text-3xl font-black text-slate-800" dir="rtl">${state.currentVerb.he}</div>
+                    </div>
+                `;
+            } else if (state.currentStep === 'v2') {
+                layoutHtml = `
+                    <div class="${boxBaseClass}">
+                        <div class="text-[8px] md:text-[10px] font-black text-slate-400">V1 (Base)</div>
+                        <div class="font-game text-base md:text-xl text-slate-700 truncate">${state.currentVerb.v1}</div>
+                    </div>
+                    ${arrowHtml}
+                    <div class="bg-gradient-to-b from-orange-400 to-orange-500 px-2 py-1.5 md:px-4 md:py-2.5 rounded-xl border-b-[3px] border-orange-600 shadow-md border-t-2 border-t-orange-300 flex-1 min-w-0 text-center">
+                        <div class="text-[8px] md:text-[10px] font-black text-orange-100">V2 (Past)?</div>
+                        <div id="target-answer-word" class="font-game text-base md:text-xl text-white text-stroke-sm truncate transition-all duration-300">?</div>
+                    </div>
+                `;
+            } else {
+                layoutHtml = `
+                    <div class="${boxBaseClass} opacity-70">
+                        <div class="text-[8px] md:text-[9px] font-black text-slate-400">V1</div>
+                        <div class="font-game text-sm md:text-lg text-slate-700 truncate">${state.currentVerb.v1}</div>
+                    </div>
+                    ${arrowHtml}
+                    <div class="${boxBaseClass} border-emerald-300 bg-emerald-50">
+                        <div class="text-[8px] md:text-[9px] font-black text-emerald-600">V2</div>
+                        <div class="font-game text-sm md:text-lg text-emerald-700 truncate">${state.currentVerb.v2.split('/')[0]}</div>
+                    </div>
+                    ${arrowHtml}
+                    <div class="bg-gradient-to-b from-indigo-400 to-indigo-500 px-2 py-1.5 md:px-4 md:py-2.5 rounded-xl border-b-[3px] border-indigo-600 shadow-md border-t-2 border-t-indigo-300 flex-1 min-w-0 text-center transform scale-105 origin-left">
+                        <div class="text-[8px] md:text-[9px] font-black text-indigo-100">V3?</div>
+                        <div id="target-answer-word" class="font-game text-sm md:text-xl text-white text-stroke-sm truncate transition-all duration-300">?</div>
+                    </div>
+                `;
+            }
+            if(container) container.innerHTML = layoutHtml;
+            generateAnswers();
+        }
+
+        function generateAnswers() {
+            const verb = state.currentVerb;
+            let options = new Set();
+            options.add(state.correctAnswer);
+
+            if (state.isGoldRound) {
+                const pool = shuffle(verbsDb.filter(v => v.v1 !== verb.v1));
+                for (const v of pool) {
+                    if (options.size >= 4) break;
+                    options.add(`${v.v1} - ${v.v2.split('/')[0]}`);
+                }
+                while (options.size < 4) {
+                    const randomV = randItem(verbsDb);
+                    options.add(`${randomV.v1} - ${randomV.v2.split('/')[0]}`);
+                }
+            } else {
+                const otherForm = state.currentStep === 'v2' ? verb.v3 : verb.v2.split('/')[0];
+                if (otherForm !== state.correctAnswer) options.add(otherForm);
+
+                let fakeEd = verb.v1.endsWith('e') ? verb.v1 + 'd' : verb.v1 + 'ed';
+                if (fakeEd !== state.correctAnswer) options.add(fakeEd);
+
+                // Prefer distractors from verbs of the same difficulty tier first (closer, trickier),
+                // then widen the pool if more options are still needed. Never repeats within a question.
+                const sameTier = shuffle(verbsDb.filter(v => v.diff === verb.diff && v.v1 !== verb.v1));
+                const widerPool = shuffle(verbsDb.filter(v => v.v1 !== verb.v1));
+
+                [sameTier, widerPool].forEach(pool => {
+                    for (const v of pool) {
+                        if (options.size >= 4) break;
+                        const form = Math.random() > 0.5 ? v.v2.split('/')[0] : v.v3;
+                        if (!options.has(form)) options.add(form);
+                    }
+                });
+            }
+
+            const finalOptions = shuffle(Array.from(options).slice(0, 4));
+            const grid = getEl('answers-grid');
+            if(!grid) return;
+            grid.innerHTML = '';
+            
+            let btnStyles = [];
+            if (state.isGoldRound) {
+                btnStyles = [
+                    { bg: 'from-yellow-100 to-yellow-300 hover:to-yellow-400', text: 'text-yellow-900', border: 'border-yellow-400', shadow: '#D97706' },
+                    { bg: 'from-amber-100 to-amber-300 hover:to-amber-400', text: 'text-amber-900', border: 'border-amber-400', shadow: '#B45309' },
+                    { bg: 'from-orange-100 to-orange-300 hover:to-orange-400', text: 'text-orange-900', border: 'border-orange-400', shadow: '#C2410C' },
+                    { bg: 'from-yellow-50 to-yellow-200 hover:to-yellow-300', text: 'text-yellow-800', border: 'border-yellow-300', shadow: '#B45309' }
+                ];
+            } else {
+                btnStyles = [
+                    { bg: 'from-blue-50 to-blue-100 hover:to-blue-200', text: 'text-blue-900', border: 'border-blue-300', shadow: '#93C5FD' },
+                    { bg: 'from-rose-50 to-rose-100 hover:to-rose-200', text: 'text-rose-900', border: 'border-rose-300', shadow: '#FDA4AF' },
+                    { bg: 'from-amber-50 to-amber-100 hover:to-amber-200', text: 'text-amber-900', border: 'border-amber-300', shadow: '#FCD34D' },
+                    { bg: 'from-emerald-50 to-emerald-100 hover:to-emerald-200', text: 'text-emerald-900', border: 'border-emerald-300', shadow: '#86EFAC' }
+                ];
+            }
+            
+            const shuffledStyles = shuffle([...btnStyles]);
+
+            finalOptions.forEach((opt, idx) => {
+                const style = shuffledStyles[idx];
+                const btn = document.createElement('button');
+                btn.className = `btn-3d w-full py-4 px-2 bg-gradient-to-b ${style.bg} ${style.border} border-2 flex items-center justify-center transition-all`;
+                btn.style.setProperty('--shadow-color', style.shadow);
+                
+                const span = document.createElement('span');
+                let textSize = opt.length > 8 ? 'text-[15px] md:text-base' : 'text-lg md:text-xl';
+                span.className = `font-ui font-black ${textSize} ${style.text} lowercase text-center leading-none`;
+                span.innerText = opt;
+                
+                btn.appendChild(span);
+                btn.onclick = (e) => handleAnswer(opt, btn, e);
+                grid.appendChild(btn);
+            });
+        }
+
+        function gainXP(amount) {
+            state.xp += amount;
+            const xpNeeded = state.level * 100;
+            if (state.xp >= xpNeeded) {
+                state.xp -= xpNeeded;
+                state.level++;
+                const badge = getEl('level-badge-inline');
+                if(badge) {
+                    badge.innerText = state.level;
+                    badge.classList.add('animate-ping');
+                    setTimeout(() => badge.classList.remove('animate-ping'), 500);
+                }
+            }
+            const pct = Math.min(100, (state.xp / (state.level * 100)) * 100);
+            const xpFill = getEl('xp-bar-fill');
+            if(xpFill) xpFill.style.width = pct + '%';
+        }
+
+        function handleAnswer(selectedOpt, btnElement, event) {
+            if (state.isAnswering) return;
+            state.isAnswering = true;
+            
+            clearInterval(state.goldTimer);
+            const timerCont = getEl('gold-timer-container');
+            if(timerCont) timerCont.classList.add('hidden');
+
+            const isCorrect = selectedOpt === state.correctAnswer;
+            
+            if (btnElement) {
+                btnElement.classList.add('simulate-active');
+                setTimeout(() => { if(btnElement) btnElement.classList.remove('simulate-active'); }, 150);
+            }
+
+            if (isCorrect) {
+                const targetWord = getEl('target-answer-word');
+                if (targetWord) {
+                    targetWord.innerText = selectedOpt;
+                    targetWord.classList.remove('text-stroke-sm');
+                    targetWord.classList.add('correct-pop');
+                }
+
+                let multi = state.isGoldRound ? 10 : 1;
+                if (state.doubleCoinTurns > 0) {
+                    multi *= 2;
+                    state.doubleCoinTurns--;
+                }
+
+                let coinsEarned = BASE_COINS * multi * (state.isFever ? 5 : 1);
+                gainXP(15 * (state.isFever ? 2 : 1) * (state.isGoldRound ? 2 : 1)); 
+                
+                // --- SAFE COORDINATES FALLBACK ---
+                let cx = window.innerWidth / 2;
+                let cy = window.innerHeight / 2;
+                if (event) {
+                    if (typeof event.clientX === 'number') {
+                        cx = event.clientX;
+                        cy = event.clientY;
+                    } else if (event.touches && event.touches.length > 0) {
+                        cx = event.touches[0].clientX;
+                        cy = event.touches[0].clientY;
+                    }
+                }
+                
+                try { spawnFlyingCoins(cx, cy, Math.min(6, Math.max(3, coinsEarned / 10))); } catch(e) { console.error("Coin Animation error handled", e); }
+                try { spawnFloatingPraise(window.innerWidth / 2, window.innerHeight * 0.4); } catch(e) {}
+                
+                const islandBase = getEl('island-base');
+                if(islandBase) {
+                    islandBase.classList.remove('shake-effect');
+                    void islandBase.offsetWidth; // Force Reflow safely
+                    islandBase.classList.add('shake-effect');
+                }
+
+                state.coins += coinsEarned;
+                state.streak++;
+                
+                try { addTowerBlock(); } catch(e) { console.error("Block creation error handled", e); }
+                state.blocks++;
+
+                updateMissionProgress('answers', 1);
+                if (state.isGoldRound) updateMissionProgress('gold', 1);
+
+                updateFeverState();
+                updatePowerupUI();
+                updateUI();
+                animateScore();
+                saveGame();
+
+                if (state.isGoldRound || state.currentStep === 'v3') {
+                    state.isGoldRound = false;
+                    document.body.classList.remove('gold-mode');
+                    const goldMsg = getEl('gold-msg');
+                    if(goldMsg) goldMsg.classList.add('hidden');
+                    state.currentStep = 'v2';
+                    
+                    if (state.blocks >= BLOCKS_PER_TOWER) {
+                        state.isTransitioningLevel = true; 
+                        const destination = travelDestinations[state.countryIndex];
+                        const cityCompleted = destination.cities[state.cityIndex];
+                        const chestSubtitle = getEl('chest-complete-subtitle');
+                        if(chestSubtitle) chestSubtitle.innerText = `You built an amazing tower in ${cityCompleted}!`;
+                        updateMissionProgress('towers', 1);
+                        setTimeout(() => openModal('chest-modal'), 1600);
+                    } else {
+                        setTimeout(() => nextQuestion(false), 1100);
+                    }
+                } else {
+                    state.currentStep = 'v3';
+                    setTimeout(() => nextQuestion(false), 1100);
+                }
+            } else {
+                if (btnElement) {
+                    btnElement.style.transform = 'translateX(-5px)';
+                    setTimeout(() => { if(btnElement) btnElement.style.transform = 'translateX(5px)'; }, 100);
+                    setTimeout(() => { if(btnElement) btnElement.style.transform = 'translateX(-5px)'; }, 200);
+                    setTimeout(() => { if(btnElement) btnElement.style.transform = 'translateX(0)'; }, 300);
+                    btnElement.style.filter = 'grayscale(100%) opacity(0.6)';
+                }
+
+                if (state.isGoldRound) {
+                    state.isGoldRound = false;
+                    document.body.classList.remove('gold-mode');
+                    const goldMsg = getEl('gold-msg');
+                    if(goldMsg) goldMsg.classList.add('hidden');
+                }
+
+                if (state.activeShield) {
+                    state.activeShield = false;
+                    const shieldEl = getEl('hud-shield');
+                    if(shieldEl) {
+                        shieldEl.innerText = '💥';
+                        setTimeout(() => { shieldEl.innerText = '🛡️'; updatePowerupUI(); }, 800);
+                    }
+                } else {
+                    state.streak = 0;
+                }
+
+                if (state.doubleCoinTurns > 0) state.doubleCoinTurns--; 
+
+                updateFeverState();
+                updatePowerupUI();
+                updateUI();
+                saveGame();
+                setTimeout(() => {
+                    state.isAnswering = false;
+                    if (selectedOpt === null) nextQuestion(false); 
+                }, 600);
+            }
+        }
+
+        function addTowerBlock() {
+            const stack = getEl('tower-stack');
+            if(!stack) return;
+            const block = document.createElement('div');
+            block.className = 'color-block';
+            block.style.backgroundColor = randItem(blockColors);
+            
+            // POSITIONING FIX: Using absolute placement from bottom prevents all Layout/Flexbox bugs!
+            const blockIdx = Number(state.blocks) || 0;
+            block.style.bottom = `${blockIdx * 23}px`; 
+            block.style.zIndex = blockIdx + 1;
+            
+            stack.appendChild(block);
+
+            setTimeout(() => {
+                if (!block || !block.parentNode) return; 
+                for(let i = 0; i < 6; i++) {
+                    let p = document.createElement('div');
+                    p.className = 'particle';
+                    p.style.left = (Math.random() * 100 + 10) + 'px';
+                    p.style.bottom = '-8px';
+                    p.style.setProperty('--px', (Math.random() * 70 - 35) + 'px');
+                    p.style.setProperty('--py', (Math.random() * -50 - 15) + 'px');
+                    block.appendChild(p);
+                    setTimeout(() => { if (p && p.parentNode) p.remove(); }, 500);
+                }
+            }, 350); 
+        }
+
+        function buildMapNodes() {
+            const container = getEl('map-nodes-container');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            const nodeDataList = [];
+            const offsets = [0, 60, 100, 60, 0, -60, -100, -60];
+            let globalIdx = 0;
+
+            const totalCities = travelDestinations.reduce((sum, d) => sum + d.cities.length, 0);
+            const completedCities = travelDestinations.slice(0, state.countryIndex).reduce((sum, d) => sum + d.cities.length, 0) + state.cityIndex;
+            const progressFill = getEl('map-progress-fill');
+            const progressLabel = getEl('map-progress-label');
+            if (progressFill) progressFill.style.width = `${Math.round((completedCities / totalCities) * 100)}%`;
+            if (progressLabel) progressLabel.innerText = `${completedCities}/${totalCities} 🏙️`;
+
+            travelDestinations.forEach((dest, cIdx) => {
+                const headerWrap = document.createElement('div');
+                headerWrap.className = 'w-full flex justify-center z-10';
+                
+                const countryHeader = document.createElement('div');
+                countryHeader.className = 'country-header-node';
+                const countryDone = cIdx < state.countryIndex;
+                countryHeader.innerHTML = `<span class="text-2xl mr-2 drop-shadow-sm">${dest.flag}</span> <span class="font-game text-xl tracking-wide">${dest.name}</span>${countryDone ? ' <span class="text-emerald-500">✓</span>' : ''}`;
+                headerWrap.appendChild(countryHeader);
+                container.appendChild(headerWrap);
+
+                dest.cities.forEach((city, cityIdx) => {
+                    const nodeWrap = document.createElement('div');
+                    nodeWrap.className = 'w-full flex justify-center z-10 relative';
+                    
+                    const node = document.createElement('div');
+                    node.className = 'map-node';
+                    node.id = `map-node-${cIdx}-${cityIdx}`;
+                    
+                    const offset = offsets[globalIdx % offsets.length];
+                    node.style.transform = `translateX(${offset}px)`;
+                    
+                    let isCompleted = false, isCurrent = false;
+                    if (cIdx < state.countryIndex || (cIdx === state.countryIndex && cityIdx < state.cityIndex)) {
+                        isCompleted = true;
+                    } else if (cIdx === state.countryIndex && cityIdx === state.cityIndex) {
+                        isCurrent = true;
+                    }
+
+                    if (isCompleted) {
+                        node.classList.add('completed');
+                        node.innerHTML = '⭐';
+                        node.onclick = () => showMapToast(`⭐ ${city} — completed!`);
+                    } else if (isCurrent) {
+                        node.classList.add('current');
+                        node.style.transform = `translateX(${offset}px) scale(1.15)`;
+                        node.innerHTML = '🏢';
+                        node.onclick = () => showMapToast(`📍 You are here — ${city}`);
+                    } else {
+                        node.innerHTML = `<span class="text-slate-400 font-bold text-xs drop-shadow-sm">${dest.flag}</span><div class="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center text-sm shadow-inner backdrop-blur-sm">🔒</div>`;
+                        node.onclick = () => showMapToast('🔒 Finish earlier cities to unlock');
+                    }
+                    nodeWrap.appendChild(node);
+                    container.appendChild(nodeWrap);
+                    
+                    nodeDataList.push({ id: node.id, el: nodeWrap });
+                    globalIdx++;
+                });
+            });
+
+            setTimeout(() => drawMapPath(nodeDataList), 50);
+            positionAvatarOnMap(state.countryIndex, state.cityIndex, false);
+        }
+
+        let mapToastTimeout;
+        function showMapToast(text) {
+            const toast = getEl('map-toast');
+            if (!toast) return;
+            toast.innerText = text;
+            toast.classList.remove('hidden');
+            clearTimeout(mapToastTimeout);
+            mapToastTimeout = setTimeout(() => toast.classList.add('hidden'), 1600);
+        }
+
+        function drawMapPath(nodeDataList) {
+            const svg = getEl('map-svg-path');
+            const container = getEl('map-nodes-container');
+            if (!svg || !container || nodeDataList.length < 2) return;
+            
+            const containerRect = container.getBoundingClientRect();
+            if(containerRect.width === 0) return; // Prevent drawing if hidden completely
+            svg.setAttribute('viewBox', `0 0 ${containerRect.width} ${containerRect.height}`);
+            
+            let d = '';
+            for(let i=0; i<nodeDataList.length; i++) {
+                const nodeEl = getEl(nodeDataList[i].id);
+                if(!nodeEl) continue;
+                
+                const rect = nodeEl.getBoundingClientRect();
+                const x = (rect.left - containerRect.left) + (rect.width / 2);
+                const y = (rect.top - containerRect.top) + (rect.height / 2);
+                
+                if (i === 0) d += `M ${x} ${y} `;
+                else {
+                    const prevNode = getEl(nodeDataList[i-1].id);
+                    if(!prevNode) continue;
+                    const pRect = prevNode.getBoundingClientRect();
+                    const px = (pRect.left - containerRect.left) + (pRect.width / 2);
+                    const py = (pRect.top - containerRect.top) + (pRect.height / 2);
+                    const cpY = py + (y - py) / 2; 
+                    d += `C ${px} ${cpY}, ${x} ${cpY}, ${x} ${y} `;
+                }
+            }
+            
+            svg.innerHTML = `
+                <path d="${d}" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="${d}" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" transform="translate(0, 4)" />
+                <path d="${d}" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 15" />
+            `;
+        }
+
+        function positionAvatarOnMap(cIdx, cityIdx, animate = false) {
+            const avatar = getEl('player-avatar');
+            const targetNode = getEl(`map-node-${cIdx}-${cityIdx}`);
+            const mapContainer = getEl('saga-map');
+            if (!targetNode || !avatar || !mapContainer) return;
+
+            setTimeout(() => {
+                const containerRect = mapContainer.getBoundingClientRect();
+                const nodeRect = targetNode.getBoundingClientRect();
+                const nodeContentTop = (nodeRect.top - containerRect.top) + mapContainer.scrollTop;
+                const nodeContentLeft = (nodeRect.left - containerRect.left) + mapContainer.scrollLeft;
+
+                if (!animate) avatar.style.transition = 'none';
+                else avatar.style.transition = 'top 1.2s ease-in-out, left 1.2s ease-in-out';
+
+                avatar.style.top = `${nodeContentTop + (nodeRect.height / 2)}px`;
+                avatar.style.left = `${nodeContentLeft + (nodeRect.width / 2)}px`;
+
+                mapContainer.scrollTo({
+                    top: nodeContentTop - (containerRect.height / 2) + 40,
+                    behavior: animate ? 'smooth' : 'auto'
+                });
+            }, 100);
+        }
+
+        function openMapModal(isTransition = false) {
+            const closeBtn = getEl('map-modal-close-btn');
+            if(closeBtn) {
+                if(isTransition) closeBtn.classList.add('hidden');
+                else closeBtn.classList.remove('hidden');
+            }
+            buildMapNodes();
+            const btnContinue = getEl('btn-continue-journey');
+            if(btnContinue) btnContinue.classList.add('hidden'); 
+            openModal('map-modal');
+        }
+
+        function claimChestAndMoveMap() {
+            state.coins += 500;
+            state.gems += 5;
+            animateScore();
+            saveGame();
+            
+            openMapModal(true); 
+
+            setTimeout(() => {
+                const prevNode = getEl(`map-node-${state.countryIndex}-${state.cityIndex}`);
+                if (prevNode) {
+                    prevNode.classList.remove('current');
+                    prevNode.classList.add('completed');
+                    prevNode.innerHTML = '⭐';
+                }
+
+                state.cityIndex++;
+                let reachedNewCountry = false;
+
+                if (state.cityIndex >= 3) {
+                    state.cityIndex = 0;
+                    state.countryIndex++;
+                    
+                    // Reset Gold logic for the new country
+                    state.goldRoundsInCountry = 0;
+                    state.verbsSinceLastGold = 5;
+                    
+                    reachedNewCountry = true;
+                    if (state.countryIndex >= travelDestinations.length) state.countryIndex = 0; 
+                }
+
+                positionAvatarOnMap(state.countryIndex, state.cityIndex, true);
+
+                setTimeout(() => {
+                    const nextNode = getEl(`map-node-${state.countryIndex}-${state.cityIndex}`);
+                    if (nextNode) {
+                        nextNode.innerHTML = '🏢';
+                        nextNode.classList.add('current');
+                    }
+
+                    if (reachedNewCountry) setTimeout(() => triggerCountryWelcomeAnimation(), 800);
+                    else {
+                        const btnCont = getEl('btn-continue-journey');
+                        if(btnCont) btnCont.classList.remove('hidden');
+                    }
+                    
+                    resetBoardForNextCity();
+                }, 1300);
+            }, 800); 
+        }
+
+        function triggerCountryWelcomeAnimation() {
+            const nextCountry = travelDestinations[state.countryIndex];
+            const plane = getEl('anim-plane');
+            if(plane) plane.classList.add('active');
+            
+            setTimeout(() => {
+                if(plane) plane.classList.remove('active');
+                const wFlag = getEl('welcome-country-flag');
+                const wName = getEl('welcome-country-name');
+                if(wFlag) wFlag.innerText = nextCountry.flag;
+                if(wName) wName.innerText = nextCountry.name;
+                openModal('country-welcome-modal');
+            }, 2500);
+        }
+
+        function resetBoardForNextCity() {
+            state.blocks = 0;
+            const stack = getEl('tower-stack');
+            if(stack) stack.innerHTML = ''; 
+            updateUI();
+        }
+
+        // --- Other Helpers ---
+        function updateFeverState() {
+            const wasFever = state.isFever;
+            state.isFever = state.streak >= FEVER_THRESHOLD;
+            if (state.isFever && !wasFever) {
+                if (!state.isGoldRound) document.body.classList.add('fever-mode');
+                const fvMsg = getEl('fever-msg');
+                if(fvMsg) fvMsg.classList.remove('hidden');
+                updateMissionProgress('fever', 1);
+            } else if (!state.isFever && wasFever) {
+                document.body.classList.remove('fever-mode');
+                const fvMsg = getEl('fever-msg');
+                if(fvMsg) fvMsg.classList.add('hidden');
+            }
+        }
+
+        function updateUI() {
+            const currentDest = travelDestinations[state.countryIndex];
+            const flag = getEl('hud-country-flag');
+            const name = getEl('hud-country-name');
+            const city = getEl('hud-city-name');
+            const sil = getEl('country-silhouette');
+            const base = getEl('island-base');
+            
+            if(flag) flag.innerText = currentDest.flag;
+            if(name) name.innerText = currentDest.name;
+            if(city) city.innerText = currentDest.cities[state.cityIndex];
+            if(sil) sil.innerHTML = currentDest.silhouetteSvg;
+            if(base) base.style.backgroundColor = currentDest.accentColor;
+
+            for(let i = 0; i < 3; i++) {
+                const dot = getEl(`hud-city-dot-${i}`);
+                if(!dot) continue;
+                if (i < state.cityIndex) {
+                    dot.className = "w-3 h-3 md:w-4 md:h-4 rounded-full bg-emerald-400 border border-white shadow-md flex items-center justify-center text-[7px] md:text-[9px] scale-110";
+                    dot.innerHTML = "✅";
+                } else if (i === state.cityIndex) {
+                    dot.className = "w-3 h-3 md:w-4 md:h-4 rounded-full bg-yellow-400 border border-white shadow-md flex items-center justify-center text-[7px] md:text-[9px] animate-pulse scale-125";
+                    dot.innerHTML = "🏗️";
+                } else {
+                    dot.className = "w-3 h-3 md:w-4 md:h-4 rounded-full bg-slate-300 border border-white shadow-inner flex items-center justify-center text-[7px] md:text-[9px]";
+                    dot.innerHTML = "🏢";
+                }
+            }
+        }
+
+        function animateScore() {
+            const scoreEl = getEl('ui-score');
+            if (scoreEl) scoreEl.innerText = state.coins;
+            const wrapper = getEl('score-wrapper');
+            if (wrapper) {
+                wrapper.style.transform = 'scale(1.25)';
+                setTimeout(() => { if(wrapper) wrapper.style.transform = 'scale(1)'; }, 200);
+            }
+            
+            const gemsEl = getEl('ui-gems');
+            if (gemsEl) gemsEl.innerText = state.gems;
+        }
+
+        function spawnFlyingCoins(startX, startY, count) {
+            const scoreEl = getEl('ui-score');
+            if (!scoreEl) return;
+            const targetEl = scoreEl.getBoundingClientRect();
+            
+            // Extract safe coordinates
+            const targetX = targetEl.left || targetEl.x || 0;
+            const targetY = targetEl.top || targetEl.y || 0;
+            
+            for(let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    const coin = document.createElement('div');
+                    coin.style.position = 'fixed';
+                    coin.style.width = '25px'; coin.style.height = '25px';
+                    coin.style.backgroundImage = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23FFD23F" stroke="%23D49A00" stroke-width="6"/><circle cx="50" cy="50" r="30" fill="%23FFF0A8"/><text x="50" y="68" font-family="Arial" font-weight="900" font-size="50" fill="%23D49A00" text-anchor="middle">$</text></svg>')`;
+                    coin.style.backgroundSize = 'cover';
+                    coin.style.zIndex = '100';
+                    coin.style.pointerEvents = 'none';
+                    
+                    const safeX = typeof startX === 'number' ? startX : (window.innerWidth / 2);
+                    const safeY = typeof startY === 'number' ? startY : (window.innerHeight / 2);
+                    const sx = safeX - 12 + (Math.random() * 40 - 20);
+                    const sy = safeY - 12 + (Math.random() * 40 - 20);
+                    
+                    coin.style.left = sx + 'px';
+                    coin.style.top = sy + 'px';
+                    
+                    try {
+                        coin.animate([
+                            { transform: 'translate(0,0) scale(0.6)', opacity: 1 },
+                            { transform: `translate(${(Math.random() * 80 - 40)}px, ${(Math.random() * -80 - 40)}px) scale(1.15)`, offset: 0.4 },
+                            { transform: `translate(${targetX - sx}px, ${targetY - sy}px) scale(0.7)`, opacity: 0 }
+                        ], { duration: 750, easing: 'cubic-bezier(0.1, 0.8, 0.1, 1)', fill: 'forwards' });
+                    } catch(e) { console.warn("Animation ignored", e); }
+                    
+                    document.body.appendChild(coin);
+                    setTimeout(() => { if(coin && coin.parentNode) coin.remove(); }, 800);
+                }, i * 80);
+            }
+        }
+
+        function toggleAudioDemo() {
+            state.soundOn = !state.soundOn;
+            const btn = document.getElementById("btn-sound-toggle");
+            if(btn) {
+                if (state.soundOn) {
+                    btn.innerText = "Sound ON 🔊";
+                    btn.style.background = "#9FD7F2";
+                } else {
+                    btn.innerText = "Sound OFF 🔇";
+                    btn.style.background = "#CBD5E0";
+                }
+            }
+            saveGame();
+        }
+
+        (function initFromSave() {
+            const hasSave = loadGame();
+            const playBtn = getEl('btn-play-main');
+            const newGameLink = getEl('btn-new-game');
+            if (hasSave) {
+                if (playBtn) playBtn.innerText = 'CONTINUE';
+                if (newGameLink) newGameLink.classList.remove('hidden');
+            }
+            const soundBtn = getEl('btn-sound-toggle');
+            if (soundBtn && !state.soundOn) {
+                soundBtn.innerText = 'Sound OFF 🔇';
+                soundBtn.style.background = '#CBD5E0';
+            }
+        })();
+
+        window.addEventListener('beforeunload', saveGame);
+
+        updateUI();
+    </script>
+</body>
+</html>
