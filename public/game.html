@@ -523,28 +523,164 @@
             50% { transform: translate(-50%,-8px); }
         }
         #fever-msg h2, #gold-msg h2 { animation: bounceSoft 0.9s ease-in-out infinite; }
+
+        /* ---------- Question Timer (Playtika-style urgency ring) ---------- */
+        .q-timer-wrap {
+            width: 100%;
+            padding: 0 4px;
+            margin-bottom: 10px;
+        }
+        .q-timer-track {
+            position: relative;
+            width: 100%; height: 12px;
+            background: rgba(15,23,42,0.12);
+            border-radius: 999px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 3px rgba(0,0,0,0.15), inset 0 -1px 0 rgba(255,255,255,0.5);
+        }
+        .q-timer-fill {
+            height: 100%;
+            width: 100%;
+            border-radius: 999px;
+            background: linear-gradient(180deg, #FFF176 0%, #FFD23C 55%, #FFB000 100%);
+            box-shadow: inset 0 2px 0 rgba(255,255,255,0.7), inset 0 -2px 0 rgba(184,119,0,0.35);
+            transition: width 0.1s linear, background 0.25s ease;
+        }
+        .q-timer-fill.danger {
+            background: linear-gradient(180deg, #FFC1C1 0%, #FF7A7A 55%, #E64545 100%);
+            animation: timerBlink 0.55s ease-in-out infinite;
+        }
+        @keyframes timerBlink {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.45; }
+        }
+
+        /* ---------- Hearts (Lives) HUD ---------- */
+        .hearts-hud {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 10px 4px 8px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,220,220,0.85));
+            border: 2px solid #ffffff;
+            box-shadow: inset 0 2px 0 rgba(255,255,255,0.9), 0 4px 10px rgba(180,40,40,0.25);
+        }
+        .heart {
+            font-size: 18px;
+            filter: drop-shadow(0 2px 1px rgba(180,40,40,0.5));
+            transition: transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
+        }
+        .heart.lost {
+            opacity: 0.25;
+            filter: grayscale(1) drop-shadow(0 1px 1px rgba(0,0,0,0.4));
+            transform: scale(0.85);
+        }
+        @keyframes heartPop {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.55); }
+            100% { transform: scale(1); }
+        }
+        @keyframes heartBreak {
+            0% { transform: scale(1) rotate(0); }
+            40% { transform: scale(1.35) rotate(-8deg); }
+            100% { transform: scale(0.85) rotate(0); opacity: 0.25; }
+        }
+        .heart.pop { animation: heartPop 0.55s ease; }
+        .heart.break { animation: heartBreak 0.6s ease forwards; }
+
+        /* ---------- Flag images (crisp SVG-quality raster from flagcdn) ---------- */
+        .flag-img {
+            display: inline-block;
+            width: 22px; height: 16px;
+            border-radius: 3px;
+            object-fit: cover;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.4);
+            vertical-align: middle;
+        }
+        .flag-img.lg { width: 30px; height: 22px; border-radius: 4px; }
+        .flag-img.xl { width: 46px; height: 32px; border-radius: 6px; }
+
+        /* ---------- Landscape lock (mobile only) ---------- */
+        #landscape-lock {
+            display: none;
+            position: fixed; inset: 0;
+            z-index: 9999;
+            background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%);
+            color: #fff;
+            align-items: center; justify-content: center;
+            flex-direction: column; text-align: center; padding: 20px;
+        }
+        #landscape-lock .rotate-icon {
+            font-size: 5rem;
+            animation: rotateHint 1.6s ease-in-out infinite;
+        }
+        @keyframes rotateHint {
+            0%,100% { transform: rotate(0); }
+            50% { transform: rotate(-90deg); }
+        }
+        @media (orientation: landscape) and (max-height: 500px) {
+            #landscape-lock { display: flex; }
+        }
+
+        /* ---------- Auth Screen tweaks ---------- */
+        .auth-btn { width: 100%; }
+
+        /* ---------- Guest banner ---------- */
+        #guest-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 2px 8px;
+            font-size: 10px; font-weight: 900;
+            color: #64748B;
+            background: #FEF3C7; border: 1px solid #FCD34D;
+            border-radius: 999px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
     </style>
+
 </head>
 <body class="flex flex-col h-[100dvh] w-screen relative">
+
+    <!-- Landscape lock overlay (mobile phones only) -->
+    <div id="landscape-lock">
+        <div class="rotate-icon">📱</div>
+        <h2 class="font-game text-3xl mt-4 text-stroke-sm">Please rotate</h2>
+        <p class="mt-2 font-bold text-white/80 max-w-xs">This game is designed for portrait mode. Turn your device upright to keep playing.</p>
+    </div>
 
     <!-- Start Screen -->
     <div id="screen-start" class="absolute inset-0 z-40 flex flex-col items-center justify-center bg-white/40 backdrop-blur-md transition-opacity duration-500">
         <div class="relative w-full max-w-md flex flex-col items-center px-6" style="animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-            <div class="relative mb-8 text-center">
+            <div class="relative mb-6 text-center">
                 <div class="absolute -inset-8 bg-white blur-3xl opacity-80 rounded-full animate-pulse"></div>
                 <h1 class="text-7xl md:text-8xl font-game text-stroke-gold relative z-10 leading-none pb-2">V<br>Building</h1>
                 <p class="text-slate-600 font-bold text-lg mt-2 relative z-10 drop-shadow-sm">The #1 Irregular Verbs Game 👑</p>
             </div>
-            
-            <button id="btn-play-main" onclick="startGame()" class="btn-3d btn-play w-full py-5 text-4xl text-white text-stroke mb-4">
-                PLAY NOW
+
+            <!-- CONTINUE (only visible when a save exists for logged-in profile) -->
+            <button id="btn-play-main" onclick="startGame()" class="hidden btn-3d btn-play w-full py-5 text-3xl text-white text-stroke mb-3">
+                CONTINUE
             </button>
-            <button onclick="openModal('instructions-modal')" class="btn-3d w-full py-3 text-xl text-slate-700 font-black mb-4 shadow-sm" style="background: linear-gradient(to bottom, #F8FAFC, #E2E8F0); --shadow-color: #94A3B8; border: 2px solid white;">
+
+            <!-- Login button: saves progress -->
+            <button id="btn-login" onclick="openModal('login-modal')" class="btn-3d btn-play auth-btn py-4 text-2xl text-white text-stroke mb-3">
+                🔐 Login &amp; Save Progress
+            </button>
+
+            <!-- Guest button: no save, no hints -->
+            <button id="btn-guest" onclick="playAsGuest()" class="btn-3d auth-btn py-3 text-lg text-slate-700 font-black mb-3" style="background: linear-gradient(to bottom, #F8FAFC, #E2E8F0); --shadow-color: #94A3B8; border: 2px solid white;">
+                👤 Play as Guest
+            </button>
+
+            <p class="text-slate-500 text-xs text-center font-bold mb-4 max-w-xs">
+                Guest mode won't save your progress or unlock hints.
+            </p>
+
+            <button onclick="openModal('instructions-modal')" class="text-slate-500 font-bold text-sm underline mb-2">
                 How to Play 📖
             </button>
             <button id="btn-new-game" onclick="confirmNewGame()" class="hidden text-slate-500 font-bold text-sm underline">
                 Start a New Game
             </button>
+
         </div>
     </div>
 
@@ -591,10 +727,27 @@
                 </div>
             </div>
 
-            <button onclick="openMapModal()" class="btn-3d btn-icon w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-xl md:text-2xl flex-shrink-0">
-                🗺️
-            </button>
+            <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                <button onclick="openMapModal()" title="World Map" class="btn-3d btn-icon w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-xl md:text-2xl">
+                    🗺️
+                </button>
+                <button onclick="openModal('missions-modal')" title="Daily Missions" class="btn-3d btn-icon w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-xl md:text-2xl relative" style="background: linear-gradient(to bottom, #6BE3B4, #2A9D6A); --shadow-color: #1F7A55; border: 2px solid white;">
+                    🎯
+                    <span id="missions-badge" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] font-black px-1.5 rounded-full border border-white">!</span>
+                </button>
+            </div>
         </header>
+
+        <!-- Hearts & Guest badge strip -->
+        <div class="w-full flex justify-center items-center gap-2 -mt-1 mb-1 z-20 relative">
+            <div id="hearts-hud" class="hearts-hud" title="Lives">
+                <span id="heart-0" class="heart">❤️</span>
+                <span id="heart-1" class="heart">❤️</span>
+                <span id="heart-2" class="heart">❤️</span>
+            </div>
+            <span id="guest-badge" class="hidden">👤 Guest</span>
+        </div>
+
 
         <!-- Main Wrapper for Visual and Interaction areas -->
         <div class="flex-1 flex flex-col relative w-full overflow-hidden justify-end">
@@ -649,12 +802,24 @@
                         Step 1/2: Find Past Simple (V2)
                     </div>
 
+                    <!-- Question Timer (15s) — yellow → red blink under 5s remaining -->
+                    <div id="q-timer-wrap" class="q-timer-wrap">
+                        <div class="q-timer-track">
+                            <div id="q-timer-fill" class="q-timer-fill"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] font-black text-slate-600 mt-1 px-1 uppercase tracking-wide">
+                            <span id="q-timer-tier">🚀 Full reward</span>
+                            <span><span id="q-timer-secs">15</span>s</span>
+                        </div>
+                    </div>
+
                     <!-- Gold Timer UI (Hidden normally) -->
                     <div id="gold-timer-container" class="hidden w-full mb-3 px-2">
                         <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden shadow-inner relative">
                             <div id="gold-timer-fill" class="h-full bg-gradient-to-r from-yellow-300 to-yellow-500 timer-bar w-full"></div>
                         </div>
                     </div>
+
 
                     <!-- Single Line Container -->
                     <div id="question-container" class="flex flex-row flex-nowrap items-center justify-center gap-1 md:gap-2 mb-4 w-full px-1">
@@ -891,7 +1056,60 @@
                 GOT IT, LET'S PLAY!
             </button>
         </div>
+
+        <!-- Login Modal -->
+        <div id="login-modal" class="hidden relative w-full max-w-sm flex-col items-center bg-white rounded-[2rem] p-6 border-b-8 border-gray-200 shadow-2xl" onclick="event.stopPropagation()">
+            <button onclick="closeAllModals()" class="absolute top-4 right-4 text-gray-400 hover:text-rose-500 font-black text-2xl z-10">✕</button>
+            <div class="text-5xl mb-2">🔐</div>
+            <h2 class="font-game text-3xl text-indigo-600 mb-1 drop-shadow-sm">Log in to save</h2>
+            <p class="text-slate-500 font-bold text-xs text-center mb-4 max-w-[260px]">
+                Your progress, coins, tower, and hearts stay safe on every device.
+            </p>
+            <input id="login-email" type="email" placeholder="Email" autocomplete="email" class="w-full mb-2 px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-indigo-400 outline-none font-bold text-sm" />
+            <input id="login-password" type="password" placeholder="Password" autocomplete="current-password" class="w-full mb-3 px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-indigo-400 outline-none font-bold text-sm" />
+            <div id="login-error" class="hidden text-rose-500 text-xs font-black mb-2"></div>
+            <button onclick="submitLogin()" class="btn-3d btn-play w-full py-3 text-xl text-white text-stroke mb-2">
+                Log In
+            </button>
+            <button onclick="submitLogin(true)" class="text-indigo-500 font-black text-sm underline mb-3">
+                Create a new account
+            </button>
+            <div class="text-slate-400 text-[10px] font-bold text-center max-w-[240px]">
+                Demo login — Firebase wiring instructions live in the chat.
+            </div>
+        </div>
+
+        <!-- Login Required (guest triggered hint) -->
+        <div id="login-required-modal" class="hidden relative w-full max-w-sm flex-col items-center bg-white rounded-[2rem] p-6 border-b-8 border-gray-200 shadow-2xl text-center" onclick="event.stopPropagation()">
+            <button onclick="closeAllModals()" class="absolute top-4 right-4 text-gray-400 hover:text-rose-500 font-black text-2xl z-10">✕</button>
+            <div class="text-5xl mb-2">💡</div>
+            <h2 class="font-game text-2xl text-indigo-600 mb-1 drop-shadow-sm">Hints are for members</h2>
+            <p class="text-slate-500 font-bold text-sm mb-4 max-w-[260px]">
+                Log in to unlock hints, save progress, and keep your hearts across sessions.
+            </p>
+            <button onclick="closeAllModals(true); openModal('login-modal')" class="btn-3d btn-play w-full py-3 text-xl text-white text-stroke mb-2">
+                🔐 Log in
+            </button>
+            <button onclick="closeAllModals()" class="text-slate-500 font-bold text-sm underline">
+                Keep playing as guest
+            </button>
+        </div>
+
+        <!-- Game Over (all hearts lost) -->
+        <div id="gameover-modal" class="hidden relative w-full max-w-sm flex-col items-center bg-white rounded-[2rem] p-6 border-b-8 border-rose-300 shadow-2xl text-center" onclick="event.stopPropagation()">
+            <div class="text-6xl mb-2">💔</div>
+            <h2 class="font-game text-4xl text-rose-500 mb-1 text-stroke-sm">Stage Lost!</h2>
+            <p id="gameover-subtitle" class="text-slate-600 font-bold text-sm mb-4">You ran out of hearts. Your stage restarts from the beginning.</p>
+            <div class="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl p-3 mb-4 flex justify-around">
+                <div class="flex flex-col items-center"><span class="text-2xl">🪙</span><span class="font-black text-slate-700 text-sm" id="gameover-coins">0</span></div>
+                <div class="flex flex-col items-center"><span class="text-2xl">🏆</span><span class="font-black text-slate-700 text-sm" id="gameover-level">1</span></div>
+            </div>
+            <button onclick="restartStageFromGameOver()" class="btn-3d btn-play w-full py-4 text-2xl text-white text-stroke">
+                🔄 Try Again
+            </button>
+        </div>
     </div>
+
 
     <!-- Plane Animation Element -->
     <style>
@@ -994,30 +1212,33 @@
         // 3 countries per continent (6 continents × 3 = 18 destinations)
         const travelDestinations = [
             // Europe
-            { name: 'France', flag: '🇫🇷', continent: 'Europe', cities: ['Paris', 'Marseille', 'Lyon'], accentColor: '#A3E2D1', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><path d="M50 5 L47 25 L45 50 L35 90 L20 95 L15 100 L85 100 L80 95 L65 90 L55 50 L53 25 Z"/></svg>` },
-            { name: 'Spain', flag: '🇪🇸', continent: 'Europe', cities: ['Madrid', 'Barcelona', 'Seville'], accentColor: '#FED766', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><circle cx="50" cy="30" r="15"/><rect x="40" y="45" width="20" height="55"/><rect x="25" y="60" width="50" height="40"/></svg>` },
-            { name: 'Italy', flag: '🇮🇹', continent: 'Europe', cities: ['Rome', 'Venice', 'Florence'], accentColor: '#BCEE9B', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><ellipse cx="50" cy="60" rx="35" ry="25"/><rect x="15" y="60" width="70" height="40"/></svg>` },
+            { name: 'France', iso: 'fr', flag: '🇫🇷', continent: 'Europe', cities: ['Paris', 'Marseille', 'Lyon'], accentColor: '#A3E2D1', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><path d="M50 5 L47 25 L45 50 L35 90 L20 95 L15 100 L85 100 L80 95 L65 90 L55 50 L53 25 Z"/></svg>` },
+            { name: 'Spain', iso: 'es', flag: '🇪🇸', continent: 'Europe', cities: ['Madrid', 'Barcelona', 'Seville'], accentColor: '#FED766', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><circle cx="50" cy="30" r="15"/><rect x="40" y="45" width="20" height="55"/><rect x="25" y="60" width="50" height="40"/></svg>` },
+            { name: 'Italy', iso: 'it', flag: '🇮🇹', continent: 'Europe', cities: ['Rome', 'Venice', 'Florence'], accentColor: '#BCEE9B', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><ellipse cx="50" cy="60" rx="35" ry="25"/><rect x="15" y="60" width="70" height="40"/></svg>` },
             // Asia
-            { name: 'Japan', flag: '🇯🇵', continent: 'Asia', cities: ['Tokyo', 'Kyoto', 'Osaka'], accentColor: '#FBBFCA', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><path d="M10 90 L50 20 L90 90 Z"/><circle cx="50" cy="45" r="12" fill="red" opacity="0.3"/></svg>` },
-            { name: 'China', flag: '🇨🇳', continent: 'Asia', cities: ['Beijing', 'Shanghai', 'Xian'], accentColor: '#FFB6B6', silhouetteSvg: GENERIC_SKYLINE },
-            { name: 'India', flag: '🇮🇳', continent: 'Asia', cities: ['Delhi', 'Mumbai', 'Jaipur'], accentColor: '#FFD59E', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'Japan', iso: 'jp', flag: '🇯🇵', continent: 'Asia', cities: ['Tokyo', 'Kyoto', 'Osaka'], accentColor: '#FBBFCA', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><path d="M10 90 L50 20 L90 90 Z"/><circle cx="50" cy="45" r="12" fill="red" opacity="0.3"/></svg>` },
+            { name: 'China', iso: 'cn', flag: '🇨🇳', continent: 'Asia', cities: ['Beijing', 'Shanghai', 'Xian'], accentColor: '#FFB6B6', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'India', iso: 'in', flag: '🇮🇳', continent: 'Asia', cities: ['Delhi', 'Mumbai', 'Jaipur'], accentColor: '#FFD59E', silhouetteSvg: GENERIC_SKYLINE },
             // Africa
-            { name: 'Egypt', flag: '🇪🇬', continent: 'Africa', cities: ['Cairo', 'Luxor', 'Alexandria'], accentColor: '#F5D9A0', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><path d="M10 95 L50 25 L90 95 Z"/><path d="M25 95 L60 40 L95 95 Z" opacity="0.6"/></svg>` },
-            { name: 'Kenya', flag: '🇰🇪', continent: 'Africa', cities: ['Nairobi', 'Mombasa', 'Kisumu'], accentColor: '#C8E6A0', silhouetteSvg: GENERIC_SKYLINE },
-            { name: 'Morocco', flag: '🇲🇦', continent: 'Africa', cities: ['Marrakech', 'Fez', 'Casablanca'], accentColor: '#F4B183', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'Egypt', iso: 'eg', flag: '🇪🇬', continent: 'Africa', cities: ['Cairo', 'Luxor', 'Alexandria'], accentColor: '#F5D9A0', silhouetteSvg: `<svg viewBox="0 0 100 100" class="w-full h-full fill-current text-slate-700 opacity-20"><path d="M10 95 L50 25 L90 95 Z"/><path d="M25 95 L60 40 L95 95 Z" opacity="0.6"/></svg>` },
+            { name: 'Kenya', iso: 'ke', flag: '🇰🇪', continent: 'Africa', cities: ['Nairobi', 'Mombasa', 'Kisumu'], accentColor: '#C8E6A0', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'Morocco', iso: 'ma', flag: '🇲🇦', continent: 'Africa', cities: ['Marrakech', 'Fez', 'Casablanca'], accentColor: '#F4B183', silhouetteSvg: GENERIC_SKYLINE },
             // North America
-            { name: 'USA', flag: '🇺🇸', continent: 'North America', cities: ['New York', 'Los Angeles', 'Chicago'], accentColor: '#9FD7F2', silhouetteSvg: GENERIC_SKYLINE },
-            { name: 'Canada', flag: '🇨🇦', continent: 'North America', cities: ['Toronto', 'Vancouver', 'Montreal'], accentColor: '#FFB6B6', silhouetteSvg: GENERIC_SKYLINE },
-            { name: 'Mexico', flag: '🇲🇽', continent: 'North America', cities: ['Mexico City', 'Cancun', 'Oaxaca'], accentColor: '#BCEE9B', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'USA', iso: 'us', flag: '🇺🇸', continent: 'North America', cities: ['New York', 'Los Angeles', 'Chicago'], accentColor: '#9FD7F2', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'Canada', iso: 'ca', flag: '🇨🇦', continent: 'North America', cities: ['Toronto', 'Vancouver', 'Montreal'], accentColor: '#FFB6B6', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'Mexico', iso: 'mx', flag: '🇲🇽', continent: 'North America', cities: ['Mexico City', 'Cancun', 'Oaxaca'], accentColor: '#BCEE9B', silhouetteSvg: GENERIC_SKYLINE },
             // South America
-            { name: 'Brazil', flag: '🇧🇷', continent: 'South America', cities: ['Rio', 'São Paulo', 'Salvador'], accentColor: '#A9E6B5', silhouetteSvg: GENERIC_SKYLINE },
-            { name: 'Argentina', flag: '🇦🇷', continent: 'South America', cities: ['Buenos Aires', 'Córdoba', 'Mendoza'], accentColor: '#B7E4F5', silhouetteSvg: GENERIC_SKYLINE },
-            { name: 'Peru', flag: '🇵🇪', continent: 'South America', cities: ['Lima', 'Cusco', 'Arequipa'], accentColor: '#F5B7B1', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'Brazil', iso: 'br', flag: '🇧🇷', continent: 'South America', cities: ['Rio', 'São Paulo', 'Salvador'], accentColor: '#A9E6B5', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'Argentina', iso: 'ar', flag: '🇦🇷', continent: 'South America', cities: ['Buenos Aires', 'Córdoba', 'Mendoza'], accentColor: '#B7E4F5', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'Peru', iso: 'pe', flag: '🇵🇪', continent: 'South America', cities: ['Lima', 'Cusco', 'Arequipa'], accentColor: '#F5B7B1', silhouetteSvg: GENERIC_SKYLINE },
             // Oceania
-            { name: 'Australia', flag: '🇦🇺', continent: 'Oceania', cities: ['Sydney', 'Melbourne', 'Brisbane'], accentColor: '#FFD59E', silhouetteSvg: GENERIC_SKYLINE },
-            { name: 'New Zealand', flag: '🇳🇿', continent: 'Oceania', cities: ['Auckland', 'Wellington', 'Queenstown'], accentColor: '#A2EDD5', silhouetteSvg: GENERIC_SKYLINE },
-            { name: 'Fiji', flag: '🇫🇯', continent: 'Oceania', cities: ['Suva', 'Nadi', 'Lautoka'], accentColor: '#B7E4F5', silhouetteSvg: GENERIC_SKYLINE }
+            { name: 'Australia', iso: 'au', flag: '🇦🇺', continent: 'Oceania', cities: ['Sydney', 'Melbourne', 'Brisbane'], accentColor: '#FFD59E', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'New Zealand', iso: 'nz', flag: '🇳🇿', continent: 'Oceania', cities: ['Auckland', 'Wellington', 'Queenstown'], accentColor: '#A2EDD5', silhouetteSvg: GENERIC_SKYLINE },
+            { name: 'Fiji', iso: 'fj', flag: '🇫🇯', continent: 'Oceania', cities: ['Suva', 'Nadi', 'Lautoka'], accentColor: '#B7E4F5', silhouetteSvg: GENERIC_SKYLINE }
         ];
+
+        const flagImg = (iso, size='') => iso ? `<img class="flag-img ${size}" src="https://flagcdn.com/w80/${iso}.png" alt="" loading="lazy" />` : '';
+
 
         const missionTemplates = [
             { id: 'm_ans10', type: 'answers', target: 10, title: 'Answer 10 verbs correctly', reward: 100 },
@@ -1036,18 +1257,31 @@
             coins: 100, gems: 0, xp: 0, level: 1, streak: 0, blocks: 0,
             countryIndex: 0, cityIndex: 0,
             isFever: false, isGoldRound: false, pendingGoldPrompt: false,
-            isTransitioningLevel: false, 
+            isTransitioningLevel: false,
             goldTimer: null, goldTimeLeft: 15,
-            
+
+            // Question timer (per-question, 15s tiered reward)
+            qTimer: null, qStartTs: 0, qElapsed: 0,
+
+            // Lives — Playtika-style hearts. Max 3, +1 per continent cleared.
+            hearts: 3,
+
+            // Continent tracking — used to award a heart when a new continent begins.
+            lastContinentCleared: null,
+
+            // Auth mode: 'guest' | 'user'. Guests: no save, no hints.
+            authMode: 'guest',
+            userEmail: null,
+
             // Gold Round Logic limits
             goldRoundsInCountry: 0,
             verbsSinceLastGold: 5, // Starts at 5 so it's ready once cityIndex > 0
-            
+
             usedVerbIds: [],
             missions: [],
             currentVerb: null, currentStep: 'v2',
             correctAnswer: null, isAnswering: false, soundOn: true,
-            
+
             // Powerups
             inventory: { scissors: 0 },
             activeShield: false,
@@ -1057,41 +1291,53 @@
         const FEVER_THRESHOLD = 5;
         const BLOCKS_PER_TOWER = 10;
         const BASE_COINS = 10;
-        
+        const MAX_HEARTS = 3;
+        const Q_TIME_MS = 15000;
+
         const getEl = id => document.getElementById(id);
         const randItem = arr => arr[Math.floor(Math.random() * arr.length)];
         const shuffle = arr => arr.sort(() => Math.random() - 0.5);
 
         // --- Save / Load ---
-        const SAVE_KEY = 'vbuilding_save_v1';
+        const SAVE_KEY_BASE = 'vbuilding_save_v2';
+        const SAVE_KEY = () => state.authMode === 'user' && state.userEmail
+            ? `${SAVE_KEY_BASE}:${state.userEmail}`
+            : SAVE_KEY_BASE + ':__local';
         const SAVED_FIELDS = ['coins', 'gems', 'xp', 'level', 'countryIndex', 'cityIndex',
+            'hearts', 'lastContinentCleared',
             'goldRoundsInCountry', 'verbsSinceLastGold', 'usedVerbIds', 'missions',
             'inventory', 'activeShield', 'doubleCoinTurns', 'soundOn'];
 
+
         function saveGame() {
+            // Guests never persist progress — enforce this so guest sessions stay ephemeral.
+            if (state.authMode !== 'user') return;
             try {
                 const toSave = {};
                 SAVED_FIELDS.forEach(key => { toSave[key] = state[key]; });
-                localStorage.setItem(SAVE_KEY, JSON.stringify(toSave));
+                toSave.userEmail = state.userEmail;
+                localStorage.setItem(SAVE_KEY(), JSON.stringify(toSave));
             } catch(e) { console.warn('Save skipped', e); }
         }
 
-        function loadGame() {
+        function loadGameFor(email) {
             try {
-                const raw = localStorage.getItem(SAVE_KEY);
+                const key = `${SAVE_KEY_BASE}:${email}`;
+                const raw = localStorage.getItem(key);
                 if (!raw) return false;
                 const saved = JSON.parse(raw);
-                SAVED_FIELDS.forEach(key => {
-                    if (saved[key] !== undefined) state[key] = saved[key];
+                SAVED_FIELDS.forEach(key2 => {
+                    if (saved[key2] !== undefined) state[key2] = saved[key2];
                 });
                 return true;
             } catch(e) { console.warn('Load skipped', e); return false; }
         }
 
         function resetGame() {
-            try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+            try { localStorage.removeItem(SAVE_KEY()); } catch(e) {}
             location.reload();
         }
+
 
         function confirmNewGame() {
             if (confirm('Start a new game? Your current progress (coins, level, and map) will be lost.')) {
@@ -1255,6 +1501,8 @@
             const startScreen = getEl('screen-start');
             if(startScreen) startScreen.style.opacity = '0';
             initMissions();
+            renderHearts();
+            updateAuthBadges();
             setTimeout(() => {
                 if(startScreen) startScreen.classList.add('hidden');
                 const gameScreen = getEl('screen-game');
@@ -1264,6 +1512,45 @@
                 nextQuestion();
             }, 500);
         }
+
+        // --- Auth flow (Firebase-ready) ---
+        function playAsGuest() {
+            state.authMode = 'guest';
+            state.userEmail = null;
+            // Fresh stage — guests always start from country 0, no persisted state.
+            state.hearts = MAX_HEARTS;
+            state.lastContinentCleared = null;
+            startGame();
+        }
+
+        function submitLogin(isSignup = false) {
+            const emailEl = getEl('login-email');
+            const passEl = getEl('login-password');
+            const errEl = getEl('login-error');
+            const email = (emailEl?.value || '').trim().toLowerCase();
+            const pass = (passEl?.value || '').trim();
+            if (!email || !pass || !email.includes('@')) {
+                if (errEl) { errEl.innerText = 'Please enter a valid email and password.'; errEl.classList.remove('hidden'); }
+                return;
+            }
+            // TODO(Firebase): swap this local demo for signInWithEmailAndPassword / createUserWithEmailAndPassword.
+            state.authMode = 'user';
+            state.userEmail = email;
+            const loaded = loadGameFor(email);
+            if (!loaded) {
+                state.hearts = MAX_HEARTS;
+                state.lastContinentCleared = null;
+            }
+            if (errEl) errEl.classList.add('hidden');
+            closeAllModals(true);
+            startGame();
+        }
+
+        function updateAuthBadges() {
+            const badge = getEl('guest-badge');
+            if (badge) badge.classList.toggle('hidden', state.authMode === 'user');
+        }
+
 
         let modalTimeout;
         function openModal(id) {
@@ -1296,7 +1583,9 @@
         }
 
         function showHint() {
+            if (state.authMode !== 'user') { openModal('login-required-modal'); return; }
             if (!state.currentVerb) return;
+
             const hintV1 = getEl('hint-v1');
             const hintTrans = getEl('hint-translation');
             if(hintV1) hintV1.innerText = state.currentVerb.v1;
@@ -1482,7 +1771,10 @@
             }
             if(container) container.innerHTML = layoutHtml;
             generateAnswers();
+            // Kick off the per-question 15s reward timer. Gold rounds keep their own timer + hide this one.
+            startQuestionTimer();
         }
+
 
         function generateAnswers() {
             const verb = state.currentVerb;
@@ -1579,13 +1871,117 @@
             if(xpFill) xpFill.style.width = pct + '%';
         }
 
+        // --- Question Timer (15s, tiered reward: 0-5s full, 5-10s half, 10-15s flat 10) ---
+        function startQuestionTimer() {
+            stopQuestionTimer();
+            const wrap = getEl('q-timer-wrap');
+            const fill = getEl('q-timer-fill');
+            const secs = getEl('q-timer-secs');
+            const tier = getEl('q-timer-tier');
+            if (state.isGoldRound) { if (wrap) wrap.style.display = 'none'; return; }
+            if (wrap) wrap.style.display = 'block';
+            if (fill) { fill.style.width = '100%'; fill.classList.remove('danger'); }
+            state.qStartTs = performance.now();
+            state.qElapsed = 0;
+            state.qTimer = setInterval(() => {
+                const elapsed = performance.now() - state.qStartTs;
+                state.qElapsed = elapsed;
+                const remaining = Math.max(0, Q_TIME_MS - elapsed);
+                const pct = (remaining / Q_TIME_MS) * 100;
+                if (fill) fill.style.width = pct + '%';
+                if (secs) secs.innerText = Math.ceil(remaining / 1000);
+                if (tier) {
+                    if (elapsed < 5000) tier.innerText = '🚀 Full reward';
+                    else if (elapsed < 10000) tier.innerText = '⚡ 50% reward';
+                    else tier.innerText = '⏳ 10 coins only';
+                }
+                if (elapsed >= 10000 && fill && !fill.classList.contains('danger')) {
+                    fill.classList.add('danger');
+                }
+                if (remaining <= 0) {
+                    stopQuestionTimer();
+                    if (!state.isAnswering) handleAnswer(null, null, null);
+                }
+            }, 100);
+        }
+        function stopQuestionTimer() {
+            if (state.qTimer) { clearInterval(state.qTimer); state.qTimer = null; }
+        }
+
+        // --- Hearts (Lives) ---
+        function renderHearts() {
+            for (let i = 0; i < MAX_HEARTS; i++) {
+                const el = getEl(`heart-${i}`);
+                if (!el) continue;
+                if (i < state.hearts) { el.classList.remove('lost'); }
+                else { el.classList.add('lost'); }
+            }
+        }
+        function loseHeart() {
+            const idx = state.hearts - 1;
+            state.hearts = Math.max(0, state.hearts - 1);
+            const el = getEl(`heart-${idx}`);
+            if (el) {
+                el.classList.add('break');
+                setTimeout(() => { el.classList.remove('break'); el.classList.add('lost'); }, 600);
+            }
+            if (state.hearts <= 0) {
+                setTimeout(triggerGameOver, 900);
+            }
+        }
+        function gainHeart() {
+            if (state.hearts >= MAX_HEARTS) return;
+            const idx = state.hearts;
+            state.hearts++;
+            const el = getEl(`heart-${idx}`);
+            if (el) { el.classList.remove('lost'); el.classList.add('pop'); setTimeout(() => el.classList.remove('pop'), 600); }
+        }
+        function triggerGameOver() {
+            stopQuestionTimer();
+            state.isAnswering = true;
+            state.isTransitioningLevel = true;
+            const coinsEl = getEl('gameover-coins');
+            const lvlEl = getEl('gameover-level');
+            if (coinsEl) coinsEl.innerText = state.coins;
+            if (lvlEl) lvlEl.innerText = state.level;
+            openModal('gameover-modal');
+        }
+        function restartStageFromGameOver() {
+            // Reset the stage: back to first city of first country, refill hearts, keep coins/level (Playtika-friendly).
+            state.countryIndex = 0;
+            state.cityIndex = 0;
+            state.blocks = 0;
+            state.streak = 0;
+            state.isFever = false;
+            state.isGoldRound = false;
+            state.hearts = MAX_HEARTS;
+            state.lastContinentCleared = null;
+            state.goldRoundsInCountry = 0;
+            state.verbsSinceLastGold = 5;
+            document.body.classList.remove('fever-mode','gold-mode');
+            const goldMsg = getEl('gold-msg'); if (goldMsg) goldMsg.classList.add('hidden');
+            const feverMsg = getEl('fever-msg'); if (feverMsg) feverMsg.classList.add('hidden');
+            const stack = getEl('tower-stack'); if (stack) stack.innerHTML = '';
+            renderHearts();
+            updateUI();
+            state.isAnswering = false;
+            state.isTransitioningLevel = false;
+            saveGame();
+            closeAllModals(true);
+            setTimeout(() => nextQuestion(), 200);
+        }
+
         function handleAnswer(selectedOpt, btnElement, event) {
             if (state.isAnswering) return;
             state.isAnswering = true;
-            
+
+            const answerElapsed = state.qElapsed || (performance.now() - state.qStartTs);
+            stopQuestionTimer();
+
             clearInterval(state.goldTimer);
             const timerCont = getEl('gold-timer-container');
             if(timerCont) timerCont.classList.add('hidden');
+
 
             const isCorrect = selectedOpt === state.correctAnswer;
             
@@ -1608,7 +2004,15 @@
                     state.doubleCoinTurns--;
                 }
 
-                let coinsEarned = BASE_COINS * multi * (state.isFever ? 5 : 1);
+                // Tiered reward by answer speed (skip for gold rounds — gold uses its own 10x multi).
+                let baseByTier;
+                if (state.isGoldRound) baseByTier = BASE_COINS;
+                else if (answerElapsed < 5000) baseByTier = BASE_COINS;         // full
+                else if (answerElapsed < 10000) baseByTier = Math.round(BASE_COINS * 0.5); // 50%
+                else baseByTier = 10;                                            // late: flat 10
+                const feverBonus = (state.isFever && !state.isGoldRound) ? 5 : 1;
+                let coinsEarned = (state.isGoldRound ? BASE_COINS : baseByTier) * multi * feverBonus;
+
                 gainXP(15 * (state.isFever ? 2 : 1) * (state.isGoldRound ? 2 : 1)); 
                 
                 // --- SAFE COORDINATES FALLBACK ---
@@ -1688,6 +2092,7 @@
                 }
 
                 if (state.activeShield) {
+                    // Shield absorbs the mistake — no heart lost.
                     state.activeShield = false;
                     const shieldEl = getEl('hud-shield');
                     if(shieldEl) {
@@ -1696,20 +2101,26 @@
                     }
                 } else {
                     state.streak = 0;
+                    // Costs a heart. Game over triggers automatically if it hits 0.
+                    loseHeart();
                 }
 
-                if (state.doubleCoinTurns > 0) state.doubleCoinTurns--; 
+                if (state.doubleCoinTurns > 0) state.doubleCoinTurns--;
 
                 updateFeverState();
                 updatePowerupUI();
                 updateUI();
+                renderHearts();
                 saveGame();
                 setTimeout(() => {
                     state.isAnswering = false;
-                    if (selectedOpt === null) nextQuestion(false); 
+                    // Never queue another question if the stage ended (hearts hit 0).
+                    if (state.hearts <= 0) return;
+                    if (selectedOpt === null) nextQuestion(false);
                 }, 600);
             }
         }
+
 
         function addTowerBlock() {
             const stack = getEl('tower-stack');
@@ -1776,7 +2187,7 @@
                 const countryHeader = document.createElement('div');
                 countryHeader.className = 'country-header-node';
                 const countryDone = cIdx < state.countryIndex;
-                countryHeader.innerHTML = `<span class="text-2xl mr-2 drop-shadow-sm">${dest.flag}</span> <span class="font-game text-xl tracking-wide">${dest.name}</span>${countryDone ? ' <span class="text-emerald-500">✓</span>' : ''}`;
+                countryHeader.innerHTML = `${flagImg(dest.iso, 'lg')} <span class="font-game text-xl tracking-wide ml-2">${dest.name}</span>${countryDone ? ' <span class="text-emerald-500">✓</span>' : ''}`;
                 headerWrap.appendChild(countryHeader);
                 container.appendChild(headerWrap);
 
@@ -1808,7 +2219,7 @@
                         node.innerHTML = '🏢';
                         node.onclick = () => showMapToast(`📍 You are here — ${city}`);
                     } else {
-                        node.innerHTML = `<span class="text-slate-400 font-bold text-xs drop-shadow-sm">${dest.flag}</span><div class="absolute inset-0 bg-black/20 rounded-full flex items-center justify-center text-sm shadow-inner backdrop-blur-sm">🔒</div>`;
+                        node.innerHTML = `${flagImg(dest.iso, 'lg')}<div class="absolute inset-0 bg-black/25 rounded-full flex items-center justify-center text-sm shadow-inner backdrop-blur-sm">🔒</div>`;
                         node.onclick = () => showMapToast('🔒 Finish earlier cities to unlock');
                     }
                     nodeWrap.appendChild(node);
@@ -1928,15 +2339,27 @@
 
                 if (state.cityIndex >= 3) {
                     state.cityIndex = 0;
+                    // Detect a continent switch — award a heart when the *previous* continent finishes.
+                    const prevContinent = travelDestinations[state.countryIndex]?.continent;
                     state.countryIndex++;
-                    
+
                     // Reset Gold logic for the new country
                     state.goldRoundsInCountry = 0;
                     state.verbsSinceLastGold = 5;
-                    
+
                     reachedNewCountry = true;
-                    if (state.countryIndex >= travelDestinations.length) state.countryIndex = 0; 
+                    if (state.countryIndex >= travelDestinations.length) state.countryIndex = 0;
+
+                    const newContinent = travelDestinations[state.countryIndex]?.continent;
+                    if (prevContinent && newContinent && prevContinent !== newContinent && prevContinent !== state.lastContinentCleared) {
+                        state.lastContinentCleared = prevContinent;
+                        // Reward: +1 heart (capped at MAX_HEARTS) + a small toast on the map.
+                        gainHeart();
+                        renderHearts();
+                        showMapToast(`❤️ +1 Heart — ${prevContinent} cleared!`);
+                    }
                 }
+
 
                 positionAvatarOnMap(state.countryIndex, state.cityIndex, true);
 
@@ -2096,11 +2519,19 @@
         }
 
         (function initFromSave() {
-            const hasSave = loadGame();
+            // Auto-restore last logged-in user, if any (Firebase would replace this with onAuthStateChanged).
+            let lastUser = null;
+            try { lastUser = localStorage.getItem('vbuilding_last_user'); } catch(e) {}
+            let hasSave = false;
+            if (lastUser) {
+                state.authMode = 'user';
+                state.userEmail = lastUser;
+                hasSave = loadGameFor(lastUser);
+            }
             const playBtn = getEl('btn-play-main');
             const newGameLink = getEl('btn-new-game');
             if (hasSave) {
-                if (playBtn) playBtn.innerText = 'CONTINUE';
+                if (playBtn) playBtn.classList.remove('hidden');
                 if (newGameLink) newGameLink.classList.remove('hidden');
             }
             const soundBtn = getEl('btn-sound-toggle');
@@ -2108,7 +2539,16 @@
                 soundBtn.innerText = 'Sound OFF 🔇';
                 soundBtn.style.background = '#CBD5E0';
             }
+            renderHearts();
         })();
+
+        // Remember the last logged-in email so returning users skip the login screen.
+        const _origSubmit = submitLogin;
+        submitLogin = function(isSignup) {
+            _origSubmit(isSignup);
+            try { if (state.userEmail) localStorage.setItem('vbuilding_last_user', state.userEmail); } catch(e) {}
+        };
+
 
         window.addEventListener('beforeunload', saveGame);
 
