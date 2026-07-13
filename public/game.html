@@ -1583,7 +1583,9 @@
         }
 
         function showHint() {
+            if (state.authMode !== 'user') { openModal('login-required-modal'); return; }
             if (!state.currentVerb) return;
+
             const hintV1 = getEl('hint-v1');
             const hintTrans = getEl('hint-translation');
             if(hintV1) hintV1.innerText = state.currentVerb.v1;
