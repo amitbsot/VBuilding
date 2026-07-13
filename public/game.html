@@ -2187,7 +2187,7 @@
                 const countryHeader = document.createElement('div');
                 countryHeader.className = 'country-header-node';
                 const countryDone = cIdx < state.countryIndex;
-                countryHeader.innerHTML = `<span class="text-2xl mr-2 drop-shadow-sm">${dest.flag}</span> <span class="font-game text-xl tracking-wide">${dest.name}</span>${countryDone ? ' <span class="text-emerald-500">✓</span>' : ''}`;
+                countryHeader.innerHTML = `${flagImg(dest.iso, 'lg')} <span class="font-game text-xl tracking-wide ml-2">${dest.name}</span>${countryDone ? ' <span class="text-emerald-500">✓</span>' : ''}`;
                 headerWrap.appendChild(countryHeader);
                 container.appendChild(headerWrap);
 
