@@ -802,12 +802,24 @@
                         Step 1/2: Find Past Simple (V2)
                     </div>
 
+                    <!-- Question Timer (15s) — yellow → red blink under 5s remaining -->
+                    <div id="q-timer-wrap" class="q-timer-wrap">
+                        <div class="q-timer-track">
+                            <div id="q-timer-fill" class="q-timer-fill"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] font-black text-slate-600 mt-1 px-1 uppercase tracking-wide">
+                            <span id="q-timer-tier">🚀 Full reward</span>
+                            <span><span id="q-timer-secs">15</span>s</span>
+                        </div>
+                    </div>
+
                     <!-- Gold Timer UI (Hidden normally) -->
                     <div id="gold-timer-container" class="hidden w-full mb-3 px-2">
                         <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden shadow-inner relative">
                             <div id="gold-timer-fill" class="h-full bg-gradient-to-r from-yellow-300 to-yellow-500 timer-bar w-full"></div>
                         </div>
                     </div>
+
 
                     <!-- Single Line Container -->
                     <div id="question-container" class="flex flex-row flex-nowrap items-center justify-center gap-1 md:gap-2 mb-4 w-full px-1">
