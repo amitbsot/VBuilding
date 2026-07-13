@@ -1706,10 +1706,23 @@
             if (progressFill) progressFill.style.width = `${Math.round((completedCities / totalCities) * 100)}%`;
             if (progressLabel) progressLabel.innerText = `${completedCities}/${totalCities} 🏙️`;
 
+            let lastContinent = null;
             travelDestinations.forEach((dest, cIdx) => {
+                // Continent divider chip (Playtika-style world grouping)
+                if (dest.continent && dest.continent !== lastContinent) {
+                    const contWrap = document.createElement('div');
+                    contWrap.className = 'w-full flex justify-center z-10';
+                    const contChip = document.createElement('div');
+                    contChip.className = 'continent-chip';
+                    contChip.innerHTML = `<span class="opacity-80">🌍</span> ${dest.continent}`;
+                    contWrap.appendChild(contChip);
+                    container.appendChild(contWrap);
+                    lastContinent = dest.continent;
+                }
+
                 const headerWrap = document.createElement('div');
                 headerWrap.className = 'w-full flex justify-center z-10';
-                
+
                 const countryHeader = document.createElement('div');
                 countryHeader.className = 'country-header-node';
                 const countryDone = cIdx < state.countryIndex;
