@@ -2039,12 +2039,12 @@
                     state.doubleCoinTurns--;
                 }
 
-                // Tiered reward by answer speed (skip for gold rounds — gold uses its own 10x multi).
+                // Tiered reward by answer speed: 100 (fast) / 50 (medium) / 10 (slow).
                 let baseByTier;
                 if (state.isGoldRound) baseByTier = BASE_COINS;
-                else if (answerElapsed < 5000) baseByTier = BASE_COINS;         // full
-                else if (answerElapsed < 10000) baseByTier = Math.round(BASE_COINS * 0.5); // 50%
-                else baseByTier = 10;                                            // late: flat 10
+                else if (answerElapsed < 5000) baseByTier = 100;         // full
+                else if (answerElapsed < 10000) baseByTier = 50;         // medium
+                else baseByTier = 10;                                    // late
                 const feverBonus = (state.isFever && !state.isGoldRound) ? 5 : 1;
                 let coinsEarned = (state.isGoldRound ? BASE_COINS : baseByTier) * multi * feverBonus;
 
