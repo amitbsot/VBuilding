@@ -1352,6 +1352,7 @@
         function initMissions() {
             if(state.missions.length === 0) generateMissions();
             renderMissions();
+            updateMissionsBadge();
         }
 
         function generateMissions() {
