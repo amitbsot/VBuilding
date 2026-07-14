@@ -1357,6 +1357,15 @@
         function generateMissions() {
             const shuffled = shuffle([...missionTemplates]);
             state.missions = shuffled.slice(0, 3).map(m => ({...m, progress: 0, completed: false}));
+            state.missionsUnseen = true;
+            updateMissionsBadge();
+        }
+
+        function updateMissionsBadge() {
+            const badge = getEl('missions-badge');
+            if (!badge) return;
+            if (state.missionsUnseen) badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
         }
 
         function updateMissionProgress(type, amount = 1) {
