@@ -689,14 +689,14 @@
         <!-- Progress Bar -->
         <div class="xp-bar-wrap"><div id="xp-bar-fill" class="xp-bar-fill"></div></div>
 
-     <!-- Hearts & Guest badge strip -->
-       <div class="w-full flex justify-center items-center gap-2 -mt-1 mb-1 z-20 relative">
-            <div id="hearts-hud" class="hearts-hud" title="Lives">
+     <!-- Hearts & Guest badge strip (right-aligned, 2px gap) -->
+       <div class="w-full flex justify-end items-center z-20 relative pr-2" style="gap:2px; margin-top:2px; margin-bottom:2px;">
+            <span id="guest-badge" class="hidden">👤 Guest</span>
+            <div id="hearts-hud" class="hearts-hud" title="Lives" style="gap:2px;">
                 <span id="heart-0" class="heart">❤️</span>
                 <span id="heart-1" class="heart">❤️</span>
                 <span id="heart-2" class="heart">❤️</span>
             </div>
-            <span id="guest-badge" class="hidden">👤 Guest</span>
         </div>
         <!-- Optimized Header -->
         <header class="w-full p-2 md:p-3 z-20 flex justify-between items-center gap-1 md:gap-2 relative shrink-0">
