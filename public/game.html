@@ -1567,7 +1567,7 @@
             Array.from(backdrop.children).forEach(child => { child.classList.add('hidden'); child.classList.remove('flex'); });
             const target = getEl(id);
             if(target) { target.classList.remove('hidden'); target.classList.add('flex'); }
-            if (id === 'missions-modal') renderMissions();
+            if (id === 'missions-modal') { renderMissions(); state.missionsUnseen = false; updateMissionsBadge(); }
             if (id === 'shop-modal') updatePowerupUI();
             // Pause the question timer while any popup covers the question.
             pauseQuestionTimer();
