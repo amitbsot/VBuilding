@@ -1907,6 +1907,40 @@
         }
         function stopQuestionTimer() {
             if (state.qTimer) { clearInterval(state.qTimer); state.qTimer = null; }
+            state.qPausedRemaining = null;
+        }
+        // Pause without resetting — remembers remaining ms so the reward tier is fair.
+        function pauseQuestionTimer() {
+            if (!state.qTimer) return;
+            const elapsed = performance.now() - state.qStartTs;
+            state.qPausedRemaining = Math.max(0, Q_TIME_MS - elapsed);
+            clearInterval(state.qTimer);
+            state.qTimer = null;
+        }
+        function resumeQuestionTimer() {
+            if (state.qPausedRemaining == null) return;
+            if (state.isAnswering || state.isGoldRound) { state.qPausedRemaining = null; return; }
+            const remaining = state.qPausedRemaining;
+            state.qPausedRemaining = null;
+            // Rebase start so (now - qStartTs) equals the already-consumed time.
+            state.qStartTs = performance.now() - (Q_TIME_MS - remaining);
+            const fill = getEl('q-timer-fill');
+            const secs = getEl('q-timer-secs');
+            const tier = getEl('q-timer-tier');
+            state.qTimer = setInterval(() => {
+                const elapsed = performance.now() - state.qStartTs;
+                state.qElapsed = elapsed;
+                const r = Math.max(0, Q_TIME_MS - elapsed);
+                if (fill) fill.style.width = (r / Q_TIME_MS) * 100 + '%';
+                if (secs) secs.innerText = Math.ceil(r / 1000);
+                if (tier) {
+                    if (elapsed < 5000) tier.innerText = '🚀 Full reward';
+                    else if (elapsed < 10000) tier.innerText = '⚡ 50% reward';
+                    else tier.innerText = '⏳ 10 coins only';
+                }
+                if (elapsed >= 10000 && fill && !fill.classList.contains('danger')) fill.classList.add('danger');
+                if (r <= 0) { stopQuestionTimer(); if (!state.isAnswering) handleAnswer(null, null, null); }
+            }, 100);
         }
 
         // --- Hearts (Lives) ---
