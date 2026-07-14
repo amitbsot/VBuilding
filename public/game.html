@@ -699,7 +699,7 @@
             </div>
         </div>
         <!-- Optimized Header -->
-        <header class="w-full p-2 md:p-3 z-20 flex justify-between items-center gap-1 md:gap-2 relative shrink-0">
+        <header class="w-full p-2 md:p-3 z-20 flex justify-between items-start gap-1 md:gap-2 relative shrink-0">
             <button onclick="openModal('pause-modal')" class="btn-3d btn-icon w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-lg flex-shrink-0 font-ui text-white">
                 ||
             </button>
@@ -741,7 +741,7 @@
                 </button>
                 <button onclick="openModal('missions-modal')" title="Daily Missions" class="btn-3d btn-icon w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-xl md:text-2xl relative" style="background: linear-gradient(to bottom, #6BE3B4, #2A9D6A); --shadow-color: #1F7A55; border: 2px solid white;">
                     🎯
-                    <span id="missions-badge" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] font-black px-1.5 rounded-full border border-white">!</span>
+                    <span id="missions-badge" class="hidden absolute -top-1 -right-1 w-3 h-3 md:w-3.5 md:h-3.5 rounded-full border-2 border-white shadow-md animate-pulse" style="background: radial-gradient(circle at 30% 30%, #FF7A7A, #E11D48);"></span>
                 </button>
             </div>
         </header>
@@ -1352,11 +1352,21 @@
         function initMissions() {
             if(state.missions.length === 0) generateMissions();
             renderMissions();
+            updateMissionsBadge();
         }
 
         function generateMissions() {
             const shuffled = shuffle([...missionTemplates]);
             state.missions = shuffled.slice(0, 3).map(m => ({...m, progress: 0, completed: false}));
+            state.missionsUnseen = true;
+            updateMissionsBadge();
+        }
+
+        function updateMissionsBadge() {
+            const badge = getEl('missions-badge');
+            if (!badge) return;
+            if (state.missionsUnseen) badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
         }
 
         function updateMissionProgress(type, amount = 1) {
@@ -1558,7 +1568,7 @@
             Array.from(backdrop.children).forEach(child => { child.classList.add('hidden'); child.classList.remove('flex'); });
             const target = getEl(id);
             if(target) { target.classList.remove('hidden'); target.classList.add('flex'); }
-            if (id === 'missions-modal') renderMissions();
+            if (id === 'missions-modal') { renderMissions(); state.missionsUnseen = false; updateMissionsBadge(); }
             if (id === 'shop-modal') updatePowerupUI();
             // Pause the question timer while any popup covers the question.
             pauseQuestionTimer();
@@ -2039,12 +2049,12 @@
                     state.doubleCoinTurns--;
                 }
 
-                // Tiered reward by answer speed (skip for gold rounds — gold uses its own 10x multi).
+                // Tiered reward by answer speed: 100 (fast) / 50 (medium) / 10 (slow).
                 let baseByTier;
                 if (state.isGoldRound) baseByTier = BASE_COINS;
-                else if (answerElapsed < 5000) baseByTier = BASE_COINS;         // full
-                else if (answerElapsed < 10000) baseByTier = Math.round(BASE_COINS * 0.5); // 50%
-                else baseByTier = 10;                                            // late: flat 10
+                else if (answerElapsed < 5000) baseByTier = 100;         // full
+                else if (answerElapsed < 10000) baseByTier = 50;         // medium
+                else baseByTier = 10;                                    // late
                 const feverBonus = (state.isFever && !state.isGoldRound) ? 5 : 1;
                 let coinsEarned = (state.isGoldRound ? BASE_COINS : baseByTier) * multi * feverBonus;
 
